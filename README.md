@@ -1,53 +1,33 @@
 # SkillSwap
 
-SkillSwap is a peer-to-peer skill-exchange platform built as a college project. It helps learners find people with complementary skills, arrange learning sessions, exchange knowledge, and build a trusted learning community.
+SkillSwap is a peer-to-peer learning platform made as a college project. The idea is simple: every student knows something, and every student wants to learn something. SkillSwap helps them find the right person to exchange skills with.
 
-> **The right skill is just a swap away.**
+**The right skill is just a swap away.**
 
-## Problem statement
+## About the project
 
-Students often want to learn practical skills but may not have access to suitable courses, mentors, or learning partners. At the same time, they already have skills that other students want to learn. SkillSwap connects these two groups and makes learning more social, practical, and accessible.
+Learning a new skill can be difficult when courses, mentors, or learning partners are not easily available. At the same time, many students already have useful skills they can share. SkillSwap brings these students together so they can teach, learn, and grow through real connections.
 
-## How SkillSwap works
+After creating a profile, users add the skill they can teach, the skill they want to learn, their level, and their availability. The platform then suggests people with complementary skills. Users can show interest, connect, chat, plan sessions, and share feedback after a session is completed.
 
-1. A user creates a profile with the skill they can teach, the skill they want to learn, their level, and availability.
-2. The user uploads a certificate for profile verification.
-3. SkillSwap recommends compatible learners with complementary skills.
-4. Users can select or pass on suggested profiles, send requests, chat, and plan sessions.
-5. After a session, the learner can share feedback and give a star rating.
-6. Completed exchanges can include a completion certificate and contribute to the learner's reputation.
+## Features
 
-## Main features
+- User and admin login
+- Profile creation with skills, level, and availability
+- Certificate upload and verification
+- Match suggestions and swipe-style preference cards
+- Connection requests, chat, and session scheduling
+- Session feedback and star ratings
+- Completion certificates
+- Notifications and account controls
+- Admin dashboard for reviewing certificates, users, reports, and exchanges
+- Demo profiles for showing the matching feature during a presentation
 
-- Separate user and administrator login flows
-- One-time terms and conditions for users and administrators
-- Certificate upload and profile-detail verification
-- Certificate formats supported: JPG, JPEG, PNG, and PDF (up to 10 MB)
-- Complementary-skill matching and first-time swipe/select card deck
-- Interest requests, connections, chat, and shared schedules
-- Session feedback and 1–5 star ratings
-- Completion certificates for finished exchanges
-- Notifications for upcoming actions and session feedback
-- Administrator review for certificates, reports, users, and exchanges
-- User controls for data export, certificate removal, and account deletion
-- Twenty clearly marked demo profiles for project demonstrations
+## Built with
 
-## User roles
-
-### Learner
-
-Learners create a skill profile, upload a certificate, discover suitable matches, manage skill exchanges, schedule sessions, and rate completed sessions.
-
-### Administrator
-
-Administrators review flagged certificate submissions, monitor reported content, manage users and exchanges, and help maintain a safe community.
-
-## Technology used
-
-- **Backend:** Python and Flask
-- **Database:** MongoDB
-- **Frontend:** HTML, CSS, JavaScript, and Jinja templates
-- **Security utilities:** Werkzeug password hashing, CSRF protection, and environment-based configuration
+- Python and Flask
+- MongoDB
+- HTML, CSS, JavaScript, and Jinja templates
 
 ## Run locally
 
@@ -74,7 +54,7 @@ Administrators review flagged certificate submissions, monitor reported content,
 
 6. Open `http://127.0.0.1:5000` in your browser.
 
-## College demo profiles
+## Demo profiles
 
 To create twenty safe demo learner cards for the Discover Matches screen, run:
 
@@ -82,23 +62,9 @@ To create twenty safe demo learner cards for the Discover Matches screen, run:
 python3 seed_demo_profiles.py
 ```
 
-They include reciprocal UI/UX ↔ Web Development matches and varied skill-exploration cards at beginner, intermediate, and advanced levels. All use `@skillswap.local` addresses and are clearly marked as demo profiles.
-
-## Suggested screenshots
-
-For a project presentation, add screenshots of these pages in this README:
-
-- Home page and Today's Match card
-- SkillSwap preference cards
-- User dashboard
-- Discover Matches screen
-- Certificate verification status
-- Administrator dashboard
-
-Store them in a `screenshots/` folder and link them here after adding them.
+This adds sample users with different skills and levels, so the matching feature can be demonstrated easily.
 
 ## Notes
 
-- Uploaded certificates and profile photos are intentionally excluded from Git.
-- Environment values, passwords, SMTP settings, and browser-push keys belong only in `.env` and must never be committed.
-- This project is intended for educational and demonstration purposes.
+- This project is for educational and demonstration purposes.
+- Personal uploads, passwords, and environment settings are not included in the repository.
