@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SkillSwap{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-page">
+    <div class="dashboard-card">
+        <section class="dashboard-welcome-banner">
+            <div>
+                <div class="dashboard-profile-intro">
+                    {% if user.get("profile_photo") %}
+                        <img src="{{ url_for('profile_photo', filename=user.profile_photo) }}" alt="{{ user.name }}'s profile photo">
+                    {% else %}
+                        <div class="dashboard-profile-avatar">{{ user.name[0] }}</div>
+                    {% endif %}
+                    {% if user.get("bio") %}<p>{{ user.bio }}</p>{% endif %}
+                </div>
+                <p class="dashboard-label">YOUR SKILLSWAP SPACE</p>
+                <h1>Welcome back, {{ user.name.split(' ')[0] }}!</h1>
+                <p>Here is a quick view of the details you shared with SkillSwap.</p>
+            </div>
+        </section>
+
+        {% if onboarding_status != "completed" %}
+            <aside class="onboarding-resume-card">
+                <div>
+                    <span>SKILLSWAPPING</span>
+                    <strong>Continue choosing the skills you want to explore.</strong>
+                    <p>Your demo card deck is saved, so you can pick up where you left off.</p>
+                </div>
+                <a href="{{ url_for('skill_swap_onboarding') }}">Continue cards</a>
+            </aside>
+        {% endif %}
+
+        <div class="profile-summary">
+            <div class="profile-item">
+                <span>SKILL I CAN TEACH</span>
+                <strong>{{ user.teach_skill }}</strong>
+            </div>
+
+            <div class="profile-item">
+                <span>SKILL I WANT TO LEARN</span>
+                <strong>{{ user.learn_skill }}</strong>
+            </div>
+
+            <div class="profile-item">
+                <span>SKILL LEVEL</span>
+                <strong>{{ user.skill_level }}</strong>
+            </div>
+
+            <div class="profile-item">
+                <span>AVAILABILITY</span>
+                <strong>{{ user.availability }}</strong>
+            </div>
+
+            <div class="profile-item profile-item-duration">
+                <span>LEARNING COMMITMENT</span>
+                <strong>{{ user.get("learning_duration", "Not selected yet") }}</strong>
+            </div>
+        </div>
+
+        <div class="active-exchange-overview">
+            <div>
+                <span>ACTIVE SKILL EXCHANGES</span>
+                <strong>{{ active_exchange_count }}</strong>
+            </div>
+            <a href="{{ url_for('connections') }}">View Connections</a>
+        </div>
+
+        <div class="reputation-summary">
+            <div>
+                <span>AVERAGE RATING</span>
+                <strong>
+                    {% if reputation.average is not none %}
+                        {{ reputation.average }} / 5
+                    {% else %}
+                        New
+                    {% endif %}
+                </strong>
+            </div>
+            <div>
+                <span>REVIEWS</span>
+                <strong>{{ reputation.count }}</strong>
+            </div>
+            <div>
+                <span>COMPLETED EXCHANGES</span>
+                <strong>{{ completed_exchange_count }}</strong>
+            </div>
+        </div>
+
+        <div class="verification-overview {% if verification_valid %}is-verified{% endif %}">
+            <div>
+                <span>SKILL VERIFICATION</span>
+                {% if not verification_required %}
+                    <strong>Beginner — ready to exchange</strong>
+                    <small>No certificate is required.</small>
+                {% elif verification_valid %}
+                    <strong>Verified: {{ verification.skill }}</strong>
+                    <small>Your certificate has been approved by SkillSwap.</small>
+                {% elif certificate_uploaded %}
+                    <strong>Certificate under review</strong>
+                    <small>An administrator will review your uploaded proof.</small>
+                {% else %}
+                    <strong>Verification required</strong>
+                    <small>Upload a {{ user.teach_skill }} certificate for administrator review.</small>
+                {% endif %}
+            </div>
+            {% if not verification_required %}
+                <a href="{{ url_for('matches') }}">Discover Matches</a>
+            {% elif verification_valid %}
+                <a href="{{ url_for('certificate') }}">View Certificate</a>
+            {% elif certificate_uploaded %}
+                <a href="{{ url_for('verify_skill') }}">View Verification Status</a>
+            {% else %}
+                <a href="{{ url_for('edit_profile') }}">Upload Certificate</a>
+            {% endif %}
+        </div>
+
+        <section class="badge-section">
+            <div class="badge-section-heading">
+                <h2>My Badges</h2>
+                <span>{{ badges|length }} earned</span>
+            </div>
+
+            {% if badges %}
+                <div class="badge-grid">
+                    {% for badge in badges %}
+                        <div class="badge-card">
+                            <div class="badge-icon">★</div>
+                            <div>
+                                <strong>{{ badge.name }}</strong>
+                                <p>{{ badge.description }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="badge-empty">Complete activities to begin earning badges.</p>
+            {% endif %}
+        </section>
+
+        <section class="dashboard-activity">
+            <div class="badge-section-heading">
+                <h2>Recent Activity</h2>
+                <a href="{{ url_for('activity_history') }}">View all</a>
+            </div>
+            {% if recent_activity %}
+                <div class="activity-preview-list">
+                    {% for item in recent_activity %}
+                        <div><strong>{{ item.title }}</strong><span>{{ item.detail }}</span></div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="badge-empty">Your learning activity will appear here as you connect, schedule, and complete sessions.</p>
+            {% endif %}
+        </section>
+
+        <div class="dashboard-actions">
+            <a href="{{ url_for('edit_profile') }}" class="dashboard-home-link">
+                Edit Profile
+            </a>
+
+            {% if not verification_required or verification_valid %}
+                <a href="{{ url_for('matches') }}" class="dashboard-secondary-link">Discover Matches</a>
+            {% else %}
+                <a href="{{ url_for('verify_skill') }}" class="dashboard-secondary-link">Complete Verification</a>
+            {% endif %}
+
+            <a href="{{ url_for('schedule') }}" class="dashboard-secondary-link">
+                My Schedule
+            </a>
+
+            <a href="{{ url_for('leaderboard') }}" class="dashboard-secondary-link">
+                Leaderboard
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

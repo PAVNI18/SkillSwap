@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Skill Verification - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="assessment-page">
+    <div class="assessment-card assessment-unavailable">
+        <div class="assessment-header">
+            <p class="dashboard-label">SKILL VERIFICATION</p>
+            <h1>Certificate-based verification</h1>
+        </div>
+
+        {% if not verification_required %}
+            <div class="result-passed">
+                <h2>Your profile is ready</h2>
+                <p>Beginner-level members can exchange skills without a certificate.</p>
+                <a href="{{ url_for('matches') }}" class="dashboard-home-link">Discover Matches</a>
+            </div>
+        {% elif not certificate_uploaded %}
+            <h2>Upload your certificate</h2>
+            <p>Upload proof for {{ user.teach_skill }}. An administrator will review it before verifying your skill.</p>
+            <a href="{{ url_for('edit_profile') }}" class="dashboard-home-link">Upload Certificate</a>
+        {% elif user.verification and user.verification.passed %}
+            <div class="result-passed">
+                <h2>Your skill is verified</h2>
+                <p>Your {{ user.verification.skill }} certificate has been approved.</p>
+                <a href="{{ url_for('matches') }}" class="dashboard-home-link">Discover Matches</a>
+            </div>
+        {% elif user.certificate_review and user.certificate_review.status == "rejected" %}
+            <h2>Certificate needs an update</h2>
+            <p>{{ user.certificate_review.reason }}</p>
+            <a href="{{ url_for('edit_profile') }}" class="dashboard-home-link">Update Certificate</a>
+        {% else %}
+            <h2>Certificate under review</h2>
+            <p>{{ user.certificate_review.reason if user.certificate_review else "Your proof has been submitted for administrator review." }}</p>
+            <a href="{{ url_for('dashboard') }}" class="dashboard-home-link">Back to Dashboard</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

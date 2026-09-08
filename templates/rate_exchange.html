@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Rate {{ partner.name }} - SkillSwap{% endblock %}
+
+{% block content %}
+
+<section class="rating-page">
+    <div class="rating-card">
+        <p class="dashboard-label">SHARE YOUR EXPERIENCE</p>
+        {% if partner.get("profile_photo") %}
+            <img class="rating-avatar connection-photo" src="{{ url_for('profile_photo', filename=partner.profile_photo) }}" alt="{{ partner.name }}'s profile photo">
+        {% else %}
+            <div class="rating-avatar">{{ partner.name[0] }}</div>
+        {% endif %}
+        <h1>Rate {{ partner.name }}</h1>
+        <p class="rating-intro">
+            Your feedback helps students build trust and grow their reputation.
+        </p>
+
+        {% if error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <fieldset class="star-rating">
+                <legend>Your rating</legend>
+
+                {% for number in range(5, 0, -1) %}
+                    <input
+                        type="radio"
+                        id="star-{{ number }}"
+                        name="rating"
+                        value="{{ number }}"
+                        {% if existing_review and existing_review.rating == number %}checked{% endif %}
+                        required
+                    >
+                    <label
+                        for="star-{{ number }}"
+                        title="{{ number }} stars"
+                        aria-label="{{ number }} stars"
+                    >★</label>
+                {% endfor %}
+            </fieldset>
+
+            <div class="form-group">
+                <label for="comment">Comment <span class="optional-text">(optional)</span></label>
+                <textarea
+                    id="comment"
+                    name="comment"
+                    maxlength="500"
+                    placeholder="What was it like learning and teaching together?"
+                >{% if existing_review %}{{ existing_review.comment }}{% endif %}</textarea>
+            </div>
+
+            <div class="rating-actions">
+                <a href="{{ url_for('connections') }}" class="cancel-link">Cancel</a>
+                <button type="submit" class="submit-rating-btn">
+                    {% if existing_review %}Update Rating{% else %}Submit Rating{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+{% endblock %}

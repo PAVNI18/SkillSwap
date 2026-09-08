@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Account & Data - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="account-settings-page">
+    <div class="account-settings-card">
+        <p class="dashboard-label">ACCOUNT & DATA</p>
+        <h1>Your data controls</h1>
+        <p>Download the information stored in your SkillSwap account, or permanently remove your account and its uploads.</p>
+
+        {% if error %}<p class="form-error">{{ error }}</p>{% endif %}
+
+        <section class="account-data-action">
+            <h2>Notification delivery</h2>
+            <p>In-app notifications always remain available. Choose whether SkillSwap may also contact you while you are away.</p>
+            <form method="POST" action="{{ url_for('update_notification_preferences') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <label class="notification-preference"><input type="checkbox" name="email_notifications" {% if notification_preferences.get('email') %}checked{% endif %}> Send important SkillSwap updates to {{ user.email }}</label>
+                <button class="dashboard-home-link" type="submit">Save email preference</button>
+            </form>
+            {% if push_vapid_public_key %}
+                <div class="push-preference" data-push-preference data-vapid-public-key="{{ push_vapid_public_key }}">
+                    <button type="button" class="dashboard-home-link" data-enable-push>Enable browser push notifications</button>
+                    <button type="button" class="secondary-button" data-disable-push>Disable browser push notifications</button>
+                    <p data-push-status>Browser push is off.</p>
+                </div>
+            {% else %}
+                <p class="notification-config-note">Browser push will be available after SkillSwap is deployed with its push keys.</p>
+            {% endif %}
+        </section>
+
+        <section class="account-data-action">
+            <h2>Download your data</h2>
+            <p>Your download includes your profile, connections, notifications, activity, and badges. Passwords and recovery answers are never included.</p>
+            <a href="{{ url_for('account_export') }}" class="dashboard-home-link">Download my data</a>
+        </section>
+
+        <section class="account-data-action account-delete-action">
+            <h2>Delete your account</h2>
+            <p>This permanently deletes your profile, certificate and profile-image uploads, exchanges, messages, ratings, notifications, and activity history. This cannot be undone.</p>
+            <form method="POST" action="{{ url_for('delete_own_account') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <label for="delete-password">Current password</label>
+                <input id="delete-password" type="password" name="password" autocomplete="current-password" required>
+                <label for="delete-confirmation">Type DELETE to confirm</label>
+                <input id="delete-confirmation" type="text" name="confirmation" autocomplete="off" required>
+                <button class="admin-action-button delete-action" type="submit">Delete my account permanently</button>
+            </form>
+        </section>
+    </div>
+</section>
+{% endblock %}

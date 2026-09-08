@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Login - SkillSwap{% endblock %}
+
+{% block content %}
+
+<section class="login-page">
+    <div class="login-layout">
+    <div class="login-card">
+
+        <div class="login-header">
+
+            <div class="logo"><img class="brand-mark" src="{{ url_for('static', filename='images/skillswap-s-mark.png') }}" alt="">SkillSwap</div>
+
+            <h1>Welcome back!</h1>
+
+            <p>
+                Login to continue your SkillSwap journey.
+            </p>
+
+        </div>
+        {% if error %}
+    <div class="error-message">
+        {{ error }}
+    </div>
+{% endif %}
+{% if notice %}<div class="admin-notice">{{ notice }}</div>{% endif %}
+
+        <form method="POST">
+
+            <div class="form-group">
+
+                <label for="email">Email</label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">Password</label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+
+            </div>
+
+
+            <button type="submit" class="login-submit">
+                Login
+            </button>
+
+        </form>
+
+        <a class="forgot-password-link" href="{{ url_for('forgot_password', role='user') }}">Forgot password?</a>
+
+
+        <p class="register-text">
+            Don't have an account?
+            <a href="{{ url_for('register') }}">Create an account</a>
+        </p>
+
+    </div>
+    </div>
+
+</section>
+
+{% endblock %}

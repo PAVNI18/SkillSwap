@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Connections - SkillSwap{% endblock %}
+
+{% block content %}
+
+<section class="connections-page">
+    <div class="connections-header">
+        <p class="dashboard-label">LEARN TOGETHER</p>
+        <h1>Connections & Exchanges</h1>
+        <p>Manage requests and see the learners you are actively exchanging skills with.</p>
+        <a href="{{ url_for('leaderboard') }}" class="connections-text-link">View Weekly Leaderboard</a>
+    </div>
+
+    {% if notice %}
+        <p class="connections-notice">{{ notice }}</p>
+    {% endif %}
+
+    <section class="connection-section">
+        <div class="connection-section-title">
+            <h2>Active Exchanges</h2>
+            <span>{{ active_exchanges|length }}</span>
+        </div>
+
+        {% if active_exchanges %}
+            <div class="connection-grid">
+                {% for exchange in active_exchanges %}
+                    <article class="connection-card active-connection-card">
+                        <div class="connection-person">
+                            {% if exchange.partner.get("profile_photo") %}<img class="connection-avatar connection-photo" src="{{ url_for('profile_photo', filename=exchange.partner.profile_photo) }}" alt="{{ exchange.partner.name }}'s profile photo">{% else %}<div class="connection-avatar">{{ exchange.partner.name[0] }}</div>{% endif %}
+                            <div>
+                                <h3>{{ exchange.partner.name }}</h3>
+                                <span class="status-badge status-accepted">Exchange active</span>
+                            </div>
+                        </div>
+                        <div class="connection-skills">
+                            <p><span>Teaches</span>{{ exchange.partner.teach_skill }}</p>
+                            <p><span>Learning</span>{{ exchange.partner.learn_skill }}</p>
+                        </div>
+                        <p class="partner-rating">
+                            {% if exchange.partner_reputation.average is not none %}
+                                ★ {{ exchange.partner_reputation.average }} from {{ exchange.partner_reputation.count }} review{{ "s" if exchange.partner_reputation.count != 1 else "" }}
+                            {% else %}
+                                No ratings yet
+                            {% endif %}
+                        </p>
+                        <p class="last-message-preview">
+                            {% if exchange.last_message %}
+                                Latest: {{ exchange.last_message.message }}
+                            {% else %}
+                                No messages yet. Start the conversation!
+                            {% endif %}
+                        </p>
+                        <div class="exchange-progress">
+                            <div class="exchange-progress-heading">
+                                <span>EXCHANGE PROGRESS</span>
+                                <strong>{{ exchange.progress.percentage }}%</strong>
+                            </div>
+                            <div class="exchange-progress-track" aria-label="{{ exchange.progress.percentage }} percent complete">
+                                <span style="width: {{ exchange.progress.percentage }}%"></span>
+                            </div>
+                            {% if exchange.progress.planned_sessions %}
+                                <p>{{ exchange.progress.confirmed_sessions }} of {{ exchange.progress.planned_sessions }} planned sessions confirmed</p>
+                            {% else %}
+                                <p>Set the shared timetable in Chat to start tracking progress.</p>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('chat', connection_id=exchange._id) }}" class="open-chat-link">
+                            Open Chat
+                        </a>
+                        <div class="completion-confirmation">
+                            {% if exchange.completion_confirmed_by_me %}
+                                <p>You marked this exchange ready. Waiting for {{ exchange.partner.name }}.</p>
+                            {% else %}
+                                <form action="{{ url_for('complete_exchange', connection_id=exchange._id) }}" method="POST">
+                                    <button type="submit" class="complete-exchange-btn">I’m Ready to Complete</button>
+                                </form>
+                            {% endif %}
+                            <span>{{ exchange.completion_confirmations }} of 2 partners confirmed completion</span>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="connection-empty"><strong>Ready when you are.</strong> Accept a request, then create your shared timetable to start an active exchange.</div>
+        {% endif %}
+    </section>
+
+    <section class="connection-section">
+        <div class="connection-section-title">
+            <h2>Completed Exchanges</h2>
+            <span>{{ completed_exchanges|length }}</span>
+        </div>
+
+        {% if completed_exchanges %}
+            <div class="connection-grid">
+                {% for exchange in completed_exchanges %}
+                    <article class="connection-card completed-connection-card">
+                        <div class="connection-person">
+                            {% if exchange.partner.get("profile_photo") %}<img class="connection-avatar connection-photo" src="{{ url_for('profile_photo', filename=exchange.partner.profile_photo) }}" alt="{{ exchange.partner.name }}'s profile photo">{% else %}<div class="connection-avatar">{{ exchange.partner.name[0] }}</div>{% endif %}
+                            <div>
+                                <h3>{{ exchange.partner.name }}</h3>
+                                <span class="status-badge status-completed">Completed</span>
+                            </div>
+                        </div>
+                        <div class="connection-skills">
+                            <p><span>Taught you</span>{{ exchange.partner.teach_skill }}</p>
+                            <p><span>Learned</span>{{ exchange.partner.learn_skill }}</p>
+                        </div>
+                        <p class="partner-rating">
+                            {% if exchange.partner_reputation.average is not none %}
+                                ★ {{ exchange.partner_reputation.average }} from {{ exchange.partner_reputation.count }} review{{ "s" if exchange.partner_reputation.count != 1 else "" }}
+                            {% else %}
+                                No ratings yet
+                            {% endif %}
+                        </p>
+                        <div class="completed-exchange-actions">
+                            <a href="{{ url_for('chat', connection_id=exchange._id) }}" class="completed-chat-link">View Chat</a>
+                            <a href="{{ url_for('exchange_certificates', connection_id=exchange._id) }}" class="exchange-certificate-link">View Certificates</a>
+                            <a href="{{ url_for('rate_exchange', connection_id=exchange._id) }}" class="rate-partner-link">
+                                {% if exchange.my_review %}Update Rating{% else %}Rate Partner{% endif %}
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="connection-empty">Completed learning journeys will appear here.</div>
+        {% endif %}
+    </section>
+
+    <section class="connection-section">
+        <div class="connection-section-title">
+            <h2>Received Requests</h2>
+            <span>{{ received_connections|length }}</span>
+        </div>
+
+        {% if received_connections %}
+            <div class="connection-grid">
+                {% for connection in received_connections %}
+                    <article class="connection-card">
+                        <div class="connection-person">
+                            {% if connection.user.get("profile_photo") %}<img class="connection-avatar connection-photo" src="{{ url_for('profile_photo', filename=connection.user.profile_photo) }}" alt="{{ connection.user.name }}'s profile photo">{% else %}<div class="connection-avatar">{{ connection.user.name[0] }}</div>{% endif %}
+                            <div>
+                                <h3>{{ connection.user.name }}</h3>
+                                <span class="status-badge status-{{ connection.status }}">Awaiting your response</span>
+                            </div>
+                        </div>
+                        <div class="connection-skills">
+                            <p><span>Can teach you</span>{{ connection.user.teach_skill }}</p>
+                            <p><span>Wants to learn</span>{{ connection.user.learn_skill }}</p>
+                        </div>
+                        {% if connection.status == "pending" %}
+                            <div class="request-actions">
+                                <form action="{{ url_for('connection_decision', connection_id=connection._id, decision='reject') }}" method="POST">
+                                    <button type="submit" class="reject-request-btn">Reject</button>
+                                </form>
+                                <form action="{{ url_for('connection_decision', connection_id=connection._id, decision='accept') }}" method="POST">
+                                    <button type="submit" class="accept-request-btn">Accept</button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="connection-empty"><strong>No requests waiting.</strong> When a learner is interested in exchanging skills, their request will appear here.</div>
+        {% endif %}
+    </section>
+
+    <section class="connection-section">
+        <div class="connection-section-title">
+            <h2>Sent Requests</h2>
+            <span>{{ sent_connections|length }}</span>
+        </div>
+
+        {% if sent_connections %}
+            <div class="connection-grid">
+                {% for connection in sent_connections %}
+                    <article class="connection-card">
+                        <div class="connection-person">
+                            {% if connection.user.get("profile_photo") %}<img class="connection-avatar connection-photo" src="{{ url_for('profile_photo', filename=connection.user.profile_photo) }}" alt="{{ connection.user.name }}'s profile photo">{% else %}<div class="connection-avatar">{{ connection.user.name[0] }}</div>{% endif %}
+                            <div>
+                                <h3>{{ connection.user.name }}</h3>
+                                <span class="status-badge status-{{ connection.status }}">Request sent</span>
+                            </div>
+                        </div>
+                        <div class="connection-skills">
+                            <p><span>Can teach you</span>{{ connection.user.teach_skill }}</p>
+                            <p><span>Wants to learn</span>{{ connection.user.learn_skill }}</p>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="connection-empty"><strong>No pending requests.</strong> Use Interested on a match card to invite a learner to exchange skills.</div>
+        {% endif %}
+    </section>
+
+    <a href="{{ url_for('matches') }}" class="discover-more-link">Discover More Matches</a>
+</section>
+
+{% endblock %}

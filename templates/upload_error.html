@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Error - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="assessment-page">
+    <div class="assessment-card assessment-unavailable">
+        <h1>Certificate upload problem</h1>
+        <p>{{ error }}</p>
+        <a href="{{ url_for('edit_profile') }}" class="dashboard-home-link">Return to Profile</a>
+    </div>
+</section>
+{% endblock %}

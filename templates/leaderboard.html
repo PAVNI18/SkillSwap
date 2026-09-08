@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Weekly Leaderboard - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="leaderboard-page">
+    <div class="leaderboard-shell">
+        <div class="leaderboard-header">
+            <p class="dashboard-label">LEARN · TEACH · GROW</p>
+            <h1>Weekly leaderboard</h1>
+            <p>{{ week_start.strftime("%d %b") }} – {{ week_end.strftime("%d %b %Y") }} · Confirmed sessions only</p>
+        </div>
+
+        {% if leaderboard %}
+            <div class="leaderboard-list">
+                {% for entry in leaderboard %}
+                    <article class="leaderboard-row">
+                        <div class="leaderboard-rank">{{ loop.index }}</div>
+                        {% if entry.user.get("profile_photo") %}
+                            <img class="connection-avatar connection-photo" src="{{ url_for('profile_photo', filename=entry.user.profile_photo) }}" alt="{{ entry.user.name }}'s profile photo">
+                        {% else %}
+                            <div class="connection-avatar">{{ entry.user.name[0] }}</div>
+                        {% endif %}
+                        <div class="leaderboard-person">
+                            <h2>{{ entry.user.name }}</h2>
+                            <div class="leaderboard-labels">
+                                {% for label in entry.labels %}<span>{{ label }}</span>{% endfor %}
+                            </div>
+                        </div>
+                        <div class="leaderboard-stat">
+                            <strong>{{ entry.teaching_sessions }}</strong>
+                            <span>Taught</span>
+                        </div>
+                        <div class="leaderboard-stat">
+                            <strong>{{ entry.learning_sessions }}</strong>
+                            <span>Learned</span>
+                        </div>
+                        <div class="leaderboard-stat leaderboard-total">
+                            <strong>{{ entry.total_sessions }}</strong>
+                            <span>Confirmed</span>
+                        </div>
+                        <div class="leaderboard-streak">{{ entry.streak }} week streak</div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="leaderboard-empty">
+                <div class="leaderboard-empty-mark">SkillSwap</div>
+                <h2>The leaderboard starts with your first session</h2>
+                <p>Both partners must confirm a scheduled session before it appears here.</p>
+                <a href="{{ url_for('connections') }}" class="dashboard-home-link">View Connections</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

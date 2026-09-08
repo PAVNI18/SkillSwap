@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}My Schedule - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="schedule-page themed-simple-page">
+    <div class="page-heading">
+        <p class="dashboard-label">YOUR WEEK AT A GLANCE</p>
+        <h1>{{ current_user.name }}’s exchange schedule</h1>
+        <p>This combines your teaching and learning sessions across every active SkillSwap connection this week.</p>
+    </div>
+
+    <div class="weekly-calendar">
+        {% for day in calendar_days %}
+            <article class="calendar-day {% if day == today_date %}calendar-today{% endif %}">
+                <header><span>{{ day.strftime("%a") }}</span><strong>{{ day.strftime("%d") }}</strong></header>
+                {% for item in schedule_items[day.isoformat()] %}
+                    <a class="calendar-session {% if item.is_teaching %}calendar-teaching{% endif %}" href="{{ url_for('chat', connection_id=item.connection_id) }}">
+                        <time>{{ item.time }}</time>
+                        <strong>{{ item.skill }}</strong>
+                        <span>{% if item.is_teaching %}You teach{% else %}You learn from{% endif %} {{ item.partner }}</span>
+                    </a>
+                {% else %}
+                    <p class="calendar-empty">No session</p>
+                {% endfor %}
+            </article>
+        {% endfor %}
+    </div>
+    <p class="schedule-help">Need to change a session? Open the relevant chat and update your teaching timetable.</p>
+</section>
+{% endblock %}

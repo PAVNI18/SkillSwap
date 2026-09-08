@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Start SkillSwapping - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="skill-swap-onboarding-page">
+    <header class="onboarding-intro">
+        <p class="dashboard-label">YOUR FIRST SKILLSWAP</p>
+        <h1>Pick the skills that spark your curiosity.</h1>
+        <p>Swipe right to save a skill you would like to explore, or swipe left to pass. These are demo preference cards—no connection request is sent yet.</p>
+        <p class="onboarding-progress"><strong>{{ completed_count }}</strong> of {{ total_count }} cards reviewed</p>
+    </header>
+
+    {% if cards %}
+        <div class="onboarding-card-stack" id="onboarding-card-stack" data-action-url="{{ url_for('skill_swap_card_action') }}">
+            {% for card in cards %}
+                <article
+                    class="onboarding-skill-card {% if loop.first %}is-active{% endif %}"
+                    data-onboarding-card
+                    data-card-id="{{ card.id }}"
+                    style="--card-index: {{ loop.index0 }}; z-index: {{ cards|length - loop.index0 }};"
+                >
+                    <div class="onboarding-card-top">
+                        <div class="onboarding-avatar">{{ card.name[0] }}</div>
+                        <div>
+                            <p>DEMO SKILLSWAPPER</p>
+                            <h2>{{ card.name }}</h2>
+                            <span>{{ card.level }} · {{ card.availability }}</span>
+                        </div>
+                        <span class="demo-label">DEMO</span>
+                    </div>
+                    <p class="onboarding-bio">{{ card.bio }}</p>
+                    <div class="onboarding-skills">
+                        <div><span>CAN TEACH YOU</span><strong>{{ card.teach_skill }}</strong></div>
+                        <div><span>WANTS TO LEARN</span><strong>{{ card.learn_skill }}</strong></div>
+                    </div>
+                    <div class="onboarding-actions">
+                        <button type="button" class="onboarding-pass" data-onboarding-action="left">Pass</button>
+                        <button type="button" class="onboarding-save" data-onboarding-action="right">Save skill</button>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+        <p class="onboarding-status" id="onboarding-status">Drag the card left or right, or use the buttons.</p>
+        <div class="onboarding-finish" id="onboarding-finish" hidden>
+            <strong>All done!</strong> Your skill preferences have been saved. <a href="{{ url_for('dashboard') }}">Go to Dashboard</a>
+        </div>
+        <form method="POST" action="{{ url_for('skip_skill_swap_onboarding') }}" class="onboarding-skip-form" id="onboarding-skip-form">
+            <button type="submit">Skip for now</button>
+        </form>
+    {% else %}
+        <section class="onboarding-complete-card">
+            <h2>Your demo card deck is complete.</h2>
+            <p>Your choices are saved and can help guide future SkillSwap recommendations.</p>
+            <a href="{{ url_for('dashboard') }}" class="signup-btn">Go to Dashboard</a>
+        </section>
+    {% endif %}
+</section>
+{% endblock %}

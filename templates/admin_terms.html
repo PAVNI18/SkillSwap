@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Terms - SkillSwap</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="terms-page">
+    <main class="terms-shell">
+        <section class="terms-card" aria-labelledby="terms-title">
+            <div class="terms-brand"><img src="{{ url_for('static', filename='images/skillswap-s-mark.png') }}" alt=""> <span>SkillSwap</span></div>
+            <p class="dashboard-label">ADMINISTRATOR AGREEMENT</p>
+            <h1 id="terms-title">Admin Terms &amp; Responsibilities</h1>
+            <p class="terms-intro">Please accept these responsibilities before using the SkillSwap Admin Panel. This is shown once for each administrator account.</p>
+
+            {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+
+            <div class="terms-content">
+                <section>
+                    <h2>Protect confidential access</h2>
+                    <p>Keep administrator passwords, login sessions, recovery details, and access tools private. Do not share them or let another person use your administrator account.</p>
+                </section>
+                <section>
+                    <h2>Respect user privacy</h2>
+                    <p>Use personal information, certificates, account data, and reports only when needed for legitimate platform administration. Never copy, disclose, sell, or misuse user information.</p>
+                </section>
+                <section>
+                    <h2>Handle chats responsibly</h2>
+                    <p>Do not access, reveal, alter, or delete private conversations unless a valid safety, moderation, or support duty requires it. Keep all user conversations confidential.</p>
+                </section>
+                <section>
+                    <h2>Use moderation tools fairly</h2>
+                    <p>Review certificates, reports, and accounts honestly and consistently. Do not approve, reject, suspend, or change records for personal reasons.</p>
+                </section>
+                <section>
+                    <h2>Maintain a safe platform</h2>
+                    <p>Report security concerns promptly and use administrator access only to support a safe, respectful SkillSwap community. Misuse may result in removal of administrator access.</p>
+                </section>
+            </div>
+
+            <form method="POST" action="{{ url_for('accept_admin_terms') }}" class="terms-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <label class="terms-agreement"><input type="checkbox" name="terms_agreement" value="accepted" required> I have read and agree to the SkillSwap Administrator Terms &amp; Responsibilities.</label>
+                <button type="submit" class="signup-btn">Agree &amp; open Admin Panel</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

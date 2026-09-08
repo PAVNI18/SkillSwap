@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Rate Session with {{ partner.name }} - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="rating-page">
+    <div class="rating-card">
+        <p class="dashboard-label">SESSION FEEDBACK</p>
+        {% if partner.get("profile_photo") %}
+            <img class="rating-avatar connection-photo" src="{{ url_for('profile_photo', filename=partner.profile_photo) }}" alt="{{ partner.name }}'s profile photo">
+        {% else %}
+            <div class="rating-avatar">{{ partner.name[0] }}</div>
+        {% endif %}
+        <h1>How was your experience?</h1>
+        <p class="rating-intro">Tell us about your {{ scheduled_session.skill }} session on {{ scheduled_session.session_date }}, then rate {{ partner.name }}.</p>
+
+        {% if error %}<div class="error-message">{{ error }}</div>{% endif %}
+
+        <form method="POST">
+            <fieldset class="star-rating">
+                <legend>Rate {{ partner.name }}</legend>
+                {% for number in range(5, 0, -1) %}
+                    <input type="radio" id="session-rating-{{ number }}" name="rating" value="{{ number }}" {% if existing_review and existing_review.rating == number %}checked{% endif %} required>
+                    <label for="session-rating-{{ number }}" title="{{ number }} stars" aria-label="{{ number }} stars">★</label>
+                {% endfor %}
+            </fieldset>
+
+            <div class="form-group">
+                <label for="comment">How was your experience?</label>
+                <textarea id="comment" name="comment" maxlength="500" placeholder="Share your experience from this session." required>{% if existing_review %}{{ existing_review.comment }}{% endif %}</textarea>
+            </div>
+
+            <div class="rating-actions">
+                <a href="{{ url_for('notifications') }}" class="cancel-link">Cancel</a>
+                <button type="submit" class="submit-rating-btn">{% if existing_review %}Update Rating{% else %}Submit Rating{% endif %}</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

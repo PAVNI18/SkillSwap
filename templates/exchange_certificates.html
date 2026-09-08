@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Exchange Certificates - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="exchange-certificates-page">
+    <div class="exchange-certificates-card">
+        <p class="dashboard-label">COMPLETED SKILL EXCHANGE</p>
+        <h1>Your exchange certificates</h1>
+        <p>These certificates recognise both sides of your completed journey with {{ partner.name }}.</p>
+
+        <div class="exchange-certificate-options">
+            <article>
+                <div class="certificate-option-icon">Teach</div>
+                <h2>Teaching certificate</h2>
+                <p>Recognises you for teaching {{ user.teach_skill }} to {{ partner.name }}.</p>
+                <a href="{{ url_for('exchange_certificate', connection_id=connection._id, certificate_type='teaching') }}">View Teaching Certificate</a>
+            </article>
+            <article>
+                <div class="certificate-option-icon">Learn</div>
+                <h2>Learning certificate</h2>
+                <p>Recognises you for learning {{ partner.teach_skill }} with {{ partner.name }}.</p>
+                <a href="{{ url_for('exchange_certificate', connection_id=connection._id, certificate_type='learning') }}">View Learning Certificate</a>
+            </article>
+        </div>
+
+        <a href="{{ url_for('connections') }}" class="dashboard-secondary-link">Back to Connections</a>
+    </div>
+</section>
+{% endblock %}

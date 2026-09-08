@@ -1,0 +1,130 @@
+z{% extends "base.html" %}
+
+{% block title %}Discover Matches - SkillSwap{% endblock %}
+
+{% block content %}
+
+<section class="matches-page">
+    <div class="matches-intro">
+        <p class="dashboard-label">FIND YOUR SKILL EXCHANGE</p>
+        <h1>Discover compatible learners</h1>
+        <p>
+            Swipe through students whose skills complement yours. Pass on a card
+            or mark someone you would like to connect with.
+        </p>
+    </div>
+
+    <form class="match-filter-bar" method="GET">
+        <label>
+            Skill level
+            <select name="level">
+                <option value="">All levels</option>
+                {% for level in ["Beginner", "Intermediate", "Advanced"] %}
+                    <option value="{{ level }}" {% if selected_level == level %}selected{% endif %}>{{ level }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            Availability
+            <select name="availability">
+                <option value="">Any availability</option>
+                <option value="aligned" {% if selected_availability == "aligned" %}selected{% endif %}>Availability aligns</option>
+            </select>
+        </label>
+        <button type="submit">Apply filters</button>
+        {% if selected_level or selected_availability %}
+            <a href="{{ url_for('matches') }}">Clear</a>
+        {% endif %}
+    </form>
+
+    {% if matches %}
+        <p class="match-count">{{ matches|length }} skill exchange match{{ "es" if matches|length != 1 else "" }} available</p>
+
+        <div class="swipe-card-stack" id="swipe-card-stack">
+            {% for match in matches %}
+                <article
+                    class="swipe-match-card {% if loop.first %}is-active{% endif %}"
+                    data-match-card
+                    data-match-id="{{ match._id }}"
+                    style="--card-index: {{ loop.index0 }}; z-index: {{ matches|length - loop.index0 }};"
+                    >
+                    <div class="match-card-top">
+                        {% if match.get("profile_photo") %}
+                            <img class="match-avatar connection-photo" src="{{ url_for('profile_photo', filename=match.profile_photo) }}" alt="{{ match.name }}'s profile photo">
+                        {% else %}
+                            <div class="match-avatar">{{ match.name[0] }}</div>
+                        {% endif %}
+                        <div>
+                            <p class="match-card-eyebrow">SKILLSWAP MATCH</p>
+                            <h2>{{ match.name }}</h2>
+                            {% if match.get("bio") %}<p class="match-bio">{{ match.bio }}</p>{% endif %}
+                        </div>
+                        <div class="compatibility-score">
+                            <strong>{{ match.compatibility_score }}%</strong>
+                            <span>match</span>
+                        </div>
+                    </div>
+
+                    <div class="exchange-skills">
+                        <div>
+                            <span>THEY CAN TEACH YOU</span>
+                            <strong>{{ match.teach_skill }}</strong>
+                        </div>
+                        <div>
+                            <span>THEY WANT TO LEARN</span>
+                            <strong>{{ match.learn_skill }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="match-details">
+                        <span>{{ match.level_message }}</span>
+                        <span>{{ match.availability_message }}</span>
+                    </div>
+
+                    <div class="match-level-summary">
+                        <div>
+                            <span>YOUR SKILL LEVEL</span>
+                            <strong>{{ current_user.skill_level }}</strong>
+                        </div>
+                        <div>
+                            <span>THEIR SKILL LEVEL</span>
+                            <strong>{{ match.skill_level }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="swipe-actions">
+                        <button type="button" class="pass-match-btn" data-swipe-action="left">Pass</button>
+                        <button type="button" class="connect-match-btn" data-swipe-action="right">Interested</button>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        <p class="swipe-status" id="swipe-status">
+            Drag a card left or right, or use the buttons.
+        </p>
+
+        <div class="post-swipe-actions">
+            <form action="{{ url_for('undo_match_pass') }}" method="POST" id="undo-pass-form" hidden>
+                <button type="submit" class="undo-pass-btn">Undo Last Pass</button>
+            </form>
+            <a href="{{ url_for('connections') }}" id="view-connections-link" hidden>View Connections</a>
+        </div>
+    {% else %}
+            <div class="no-matches-card">
+                <h2>No complementary matches yet</h2>
+                <p>
+                    Try changing your filters, or update your skills and availability to discover more learners.
+                </p>
+            {% if has_passed_match %}
+                <form action="{{ url_for('undo_match_pass') }}" method="POST">
+                    <button type="submit" class="undo-pass-btn">Undo Last Pass</button>
+                </form>
+            {% endif %}
+            <a href="{{ url_for('connections') }}" class="connections-text-link">View Connections</a>
+            <a href="{{ url_for('edit_profile') }}" class="dashboard-home-link">Update My Profile</a>
+        </div>
+    {% endif %}
+</section>
+
+{% endblock %}

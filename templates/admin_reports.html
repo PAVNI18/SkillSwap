@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Safety Reports - SkillSwap{% endblock %}
+{% block content %}
+<section class="admin-page admin-reports-page">
+    <a class="admin-back-link" href="{{ url_for('admin_dashboard') }}">← Back to Admin Dashboard</a>
+    <header class="admin-page-header"><div><p class="admin-eyebrow">SAFETY CENTRE</p><h1>Safety reports</h1><p>Review concerns privately, protect users, and keep exchanges respectful.</p></div><span>{{ reports|length }} report{{ "s" if reports|length != 1 else "" }}</span></header>
+    <nav class="verification-filter-tabs" aria-label="Report filters">{% for status, label in [("open", "Open"), ("under_review", "Under Review"), ("resolved", "Resolved"), ("all", "All reports")] %}<a class="{% if selected_status == status %}is-active{% endif %}" href="{{ url_for('admin_reports', status=status) }}">{{ label }}</a>{% endfor %}</nav>
+    {% if reports %}
+        <div class="admin-report-list">
+        {% for report in reports %}
+            <article class="admin-report-card">
+                <header><div><p class="admin-eyebrow">{{ report.status|replace('_', ' ')|upper }}</p><h2>{{ report.report_type }}</h2><p>Submitted {{ report.created_at.strftime("%d %b %Y · %I:%M %p") if report.created_at else "recently" }}</p></div><span class="report-connection-label">{{ report.connection_label }}</span></header>
+                <div class="admin-report-people"><div><small>REPORT SENT BY</small><strong>{{ report.reporter_name }}</strong></div><div><small>REPORTED USER</small><strong>{{ report.reported_user_name }}</strong></div></div>
+                <div class="admin-report-message"><small>REPORT MESSAGE</small><p>{{ report.details }}</p></div>
+                {% if report.action_taken %}<p class="report-action-taken">Action recorded: {{ report.action_taken }}</p>{% endif %}
+                <div class="admin-report-actions">
+                    <form method="POST" action="{{ url_for('admin_report_status', report_id=report._id) }}"><label>Update status<select name="status"><option value="open" {% if report.status == "open" %}selected{% endif %}>Open</option><option value="under_review" {% if report.status == "under_review" %}selected{% endif %}>Under Review</option><option value="resolved" {% if report.status == "resolved" %}selected{% endif %}>Resolved</option></select></label><button class="admin-action-button secondary-action" type="submit">Save status</button></form>
+                    {% if report.reported_user and report.reported_user.role != "admin" and not report.reported_user.is_suspended %}<form method="POST" action="{{ url_for('admin_suspend_reported_user', report_id=report._id) }}" onsubmit="return confirm('Suspend {{ report.reported_user_name }} for seven days while this report is reviewed?');"><button class="admin-action-button suspend-button" type="submit">Suspend for 7 days</button></form>{% endif %}
+                    {% if report.connection_label != "Connection no longer available" and "Cancelled" not in report.connection_label %}<form method="POST" action="{{ url_for('admin_cancel_reported_exchange', report_id=report._id) }}" onsubmit="return confirm('Cancel this exchange? Both users will be notified.');"><button class="admin-action-button delete-action" type="submit">Cancel exchange</button></form>{% endif %}
+                </div>
+            </article>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="admin-empty admin-management-empty"><h2>No reports in this view</h2><p>New user-submitted safety concerns will appear here for private review.</p><a href="{{ url_for('admin_reports', status='all') }}">View all reports</a></div>
+    {% endif %}
+</section>
+{% endblock %}

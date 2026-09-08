@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}User Management - SkillSwap{% endblock %}
+{% block content %}
+<section class="admin-page admin-users-page">
+    <a class="admin-back-link" href="{{ url_for('admin_dashboard') }}">← Back to Admin Dashboard</a>
+    <header class="admin-page-header">
+        <div><p class="admin-eyebrow">USER MANAGEMENT</p><h1>Manage SkillSwap accounts</h1><p>Search users, review their profiles, and take safe account actions when required.</p></div>
+        <span>{{ users|length }} account{{ "s" if users|length != 1 else "" }} shown</span>
+    </header>
+    <form class="admin-search-form" method="GET">
+        <label for="user-search">Search by name or email</label>
+        <div><input id="user-search" name="q" value="{{ search }}" placeholder="e.g. Pavni or pavni@email.com"><button type="submit">Search</button>{% if search %}<a href="{{ url_for('admin_users') }}">Clear</a>{% endif %}</div>
+    </form>
+    {% if users %}
+        <div class="admin-account-list">
+        {% for user in users %}
+            <article class="admin-account-row">
+                <div class="admin-account-avatar">{% if user.profile_photo %}<img src="{{ url_for('profile_photo', filename=user.profile_photo) }}" alt="{{ user.name }}">{% else %}{{ user.name[0] }}{% endif %}</div>
+                <div class="admin-account-main"><h2>{{ user.name }}</h2><p>{{ user.email }}</p><div class="admin-account-tags"><span>{{ user.role|capitalize }}</span>{% if user.is_suspended %}<span class="status-suspended">Suspended{% if user.suspended_until %} until {{ user.suspended_until.strftime("%d %b") }}{% endif %}</span>{% else %}<span class="status-active">Active</span>{% endif %}{% if user.verification and user.verification.passed %}<span class="status-verified">Verified</span>{% endif %}</div></div>
+                <div class="admin-account-skill"><small>TEACHES</small><strong>{{ user.teach_skill or "Not added" }}</strong></div>
+                <div class="admin-account-skill"><small>RATING</small><strong>{% if user.reputation.average %}★ {{ user.reputation.average }}{% else %}No ratings{% endif %}</strong></div>
+                <div class="admin-account-skill"><small>BADGES</small><strong>{{ user.badge_count }}</strong></div>
+                <a class="admin-view-button" href="{{ url_for('admin_user_profile', user_id=user._id) }}">View profile</a>
+            </article>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="admin-empty admin-management-empty"><h2>No accounts found</h2><p>Try a different name or email address.</p><a href="{{ url_for('admin_users') }}">View all users</a></div>
+    {% endif %}
+</section>
+{% endblock %}

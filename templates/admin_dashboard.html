@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="admin-page">
+    <header class="admin-page-header">
+        <div><p class="admin-eyebrow">PLATFORM MANAGEMENT</p><h1>SkillSwap Admin Panel</h1><p>Monitor the platform and keep exchanges safe, fair, and active.</p></div>
+        <span>Administrator: {{ session.get("user_name") }}</span>
+    </header>
+
+    <section class="admin-stat-grid">
+        <article><span>USERS</span><strong>{{ stats.total_users }}</strong><p>Registered learners</p></article>
+        <article><span>NEW USERS</span><strong>{{ stats.new_users }}</strong><p>Joined in the last 7 days</p></article>
+        <article><span>ACTIVE EXCHANGES</span><strong>{{ stats.active_exchanges }}</strong><p>Currently learning together</p></article>
+        <article><span>COMPLETED</span><strong>{{ stats.completed_exchanges }}</strong><p>Finished exchanges</p></article>
+        <article><span>CONFIRMED SESSIONS</span><strong>{{ stats.confirmed_sessions }}</strong><p>Tracked learning sessions</p></article>
+        <article class="admin-alert-card"><span>VERIFICATION QUEUE</span><strong>{{ stats.verification_queue }}</strong><p>Certificates to review</p></article>
+        <article class="admin-alert-card"><span>OPEN REPORTS</span><strong>{{ stats.open_reports }}</strong><p>Safety concerns to review</p></article>
+    </section>
+
+    <section class="admin-management-grid">
+        <article><h2>User Management</h2><p>View, search, suspend, and manage user accounts.</p><a href="{{ url_for('admin_users') }}">Manage users →</a></article>
+        <article><h2>Verification Review</h2><p>Approve or reject uploaded skill certificates.</p><a href="{{ url_for('admin_verifications') }}">Review certificates →</a></article>
+        <article><h2>Safety Centre</h2><p>Review reports and take action on unsafe exchanges.</p><a href="{{ url_for('admin_reports') }}">Review reports →</a></article>
+        <article><h2>Platform Monitoring</h2><p>Track matches, sessions, ratings, and badges.</p><a href="{{ url_for('admin_matches') }}">Monitor matches →</a></article>
+    </section>
+
+    <section class="admin-recent-users">
+        <div class="admin-section-heading"><h2>Recent users</h2><span>{{ stats.pending_requests }} pending connection request{{ "s" if stats.pending_requests != 1 else "" }}</span></div>
+        {% if recent_users %}
+            <div class="admin-user-table">
+                {% for user in recent_users %}
+                    <div><strong>{{ user.name }}</strong><span>{{ user.email }}</span><span>{{ user.teach_skill }} → {{ user.learn_skill }}</span><span>{{ user.skill_level }}</span></div>
+                {% endfor %}
+            </div>
+        {% else %}<p class="admin-empty">No regular users have registered yet.</p>{% endif %}
+    </section>
+
+    <section class="admin-platform-activity">
+        <div class="admin-section-heading"><h2>Recent platform activity</h2><span>Latest updates across SkillSwap</span></div>
+        {% if recent_platform_activity %}
+            <div class="admin-activity-list">
+                {% for item in recent_platform_activity %}
+                    <article class="admin-activity-{{ item.type }}">
+                        <div><strong>{{ item.title }}</strong><p>{{ item.actor }} · {{ item.detail }}</p></div>
+                        {% if item.created_at %}<time>{{ item.created_at.strftime("%d %b · %I:%M %p") }}</time>{% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="admin-empty">Activity will appear here as users register, connect, schedule sessions, and submit reports.</p>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}

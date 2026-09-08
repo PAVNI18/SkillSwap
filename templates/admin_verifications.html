@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Verification Review - SkillSwap{% endblock %}
+{% block content %}
+<section class="admin-page admin-verifications-page">
+    <a class="admin-back-link" href="{{ url_for('admin_dashboard') }}">← Back to Admin Dashboard</a>
+    <header class="admin-page-header"><div><p class="admin-eyebrow">SKILL AND CERTIFICATE VERIFICATION</p><h1>Review skill proof</h1><p>Approve genuine certificates and issue official SkillSwap verification.</p></div><span>{{ users|length }} certificate{{ "s" if users|length != 1 else "" }}</span></header>
+
+    <nav class="verification-filter-tabs" aria-label="Certificate filters">
+        {% for status, label in [("pending", "Pending review"), ("auto_verified", "Automatically verified"), ("approved", "Approved"), ("rejected", "Rejected"), ("all", "All uploads")] %}
+            <a class="{% if selected_status == status %}is-active{% endif %}" href="{{ url_for('admin_verifications', status=status) }}">{{ label }}</a>
+        {% endfor %}
+    </nav>
+
+    {% if users %}
+        <div class="admin-verification-list">
+        {% for user in users %}
+            <article class="admin-verification-card">
+                <header>
+                    <div><p class="admin-eyebrow">{{ user.review.status|upper }}</p><h2>{{ user.name }}</h2><p>{{ user.email }}</p></div>
+                    <a class="admin-proof-button" href="{{ url_for('admin_certificate_proof', user_id=user._id) }}" target="_blank">View uploaded proof ↗</a>
+                </header>
+                <div class="admin-verification-details">
+                    <div><small>TEACHING SKILL</small><strong>{{ user.certificate_proof.skill or user.teach_skill }}</strong></div>
+                    <div><small>SELECTED LEVEL</small><strong>{{ user.certificate_proof.skill_level or user.skill_level }}</strong></div>
+                    <div><small>UPLOADED FILE</small><strong>{{ user.certificate_proof.original_name }}</strong></div>
+                </div>
+                {% set analysis = user.certificate_proof.get("analysis", {}) %}
+                {% if analysis %}
+                    <div class="admin-verification-details">
+                        <div><small>TEXT READING</small><strong>{{ analysis.method }}</strong></div>
+                        <div><small>NAME MATCH</small><strong>{{ "Yes" if analysis.matches.name else "No" }}</strong></div>
+                        <div><small>SKILL MATCH</small><strong>{{ "Yes" if analysis.matches.skill else "No" }}</strong></div>
+                        <div><small>LEVEL MATCH</small><strong>{{ "Yes" if analysis.matches.level else "No" }}</strong></div>
+                    </div>
+                    <div class="admin-verification-details">
+                        <div><small>ISSUER FOUND</small><strong>{{ analysis.trust_signals.issuer or "Not found" }}</strong></div>
+                        <div><small>CERTIFICATE ID</small><strong>{{ analysis.trust_signals.certificate_id or "Not found" }}</strong></div>
+                        <div><small>VERIFY LINK</small><strong>{{ "Found" if analysis.trust_signals.verification_link else "Not found" }}</strong></div>
+                        <div><small>QR REFERENCE</small><strong>{{ "Found" if analysis.trust_signals.qr_reference_found else "Not found" }}</strong></div>
+                    </div>
+                    {% if analysis.error %}<p class="verification-rejection">Analysis note: {{ analysis.error }}</p>{% endif %}
+                {% endif %}
+                {% if user.review.status in ["rejected", "auto_verified"] %}<p class="verification-rejection">{{ user.review.reason }}</p>{% endif %}
+                <div class="admin-verification-actions">
+                    {% if user.review.status == "pending" %}
+                        <form method="POST" action="{{ url_for('admin_approve_certificate', user_id=user._id) }}"><button class="admin-action-button activate-button" type="submit">Approve certificate</button></form>
+                        <details><summary>Reject certificate</summary><form method="POST" action="{{ url_for('admin_reject_certificate', user_id=user._id) }}"><label>Reason for the user<textarea name="reason" required maxlength="500" placeholder="Explain what the user needs to correct."></textarea></label><button class="admin-action-button delete-action" type="submit">Reject with reason</button></form></details>
+                    {% endif %}
+                    {% if user.review.status == "rejected" %}
+                        <form method="POST" action="{{ url_for('admin_override_certificate', user_id=user._id) }}"><button class="admin-action-button activate-button" type="submit">Approve and verify (admin override)</button></form>
+                    {% endif %}
+                    {% if user.review.status == "approved" and not (user.verification and user.verification.passed) %}
+                        <form method="POST" action="{{ url_for('admin_mark_skill_verified', user_id=user._id) }}"><button class="admin-action-button secondary-action" type="submit">Mark skill as verified</button></form>
+                    {% elif user.verification and user.verification.passed %}
+                        <span class="admin-verified-label">✓ Skill already verified</span>
+                    {% endif %}
+                </div>
+            </article>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="admin-empty admin-management-empty"><h2>No certificates in this queue</h2><p>Certificate uploads from Intermediate and Advanced users will appear here.</p><a href="{{ url_for('admin_verifications', status='all') }}">View all uploads</a></div>
+    {% endif %}
+</section>
+{% endblock %}

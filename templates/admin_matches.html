@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Match Monitoring - SkillSwap{% endblock %}
+{% block content %}
+<section class="admin-page admin-matches-page">
+    <a class="admin-back-link" href="{{ url_for('admin_dashboard') }}">← Back to Admin Dashboard</a>
+    <header class="admin-page-header"><div><p class="admin-eyebrow">MATCH AND CONNECTION MONITORING</p><h1>Platform matches</h1><p>Review requests, compatibility explanations, and active skill exchanges.</p></div><span>{{ active_exchange_count }} active exchange{{ "s" if active_exchange_count != 1 else "" }}</span></header>
+    <nav class="verification-filter-tabs" aria-label="Match status filters">{% for status, label in [("all", "All"), ("pending", "Pending"), ("accepted", "Accepted / Active"), ("rejected", "Rejected"), ("completed", "Completed"), ("cancelled", "Cancelled")] %}<a class="{% if selected_status == status %}is-active{% endif %}" href="{{ url_for('admin_matches', status=status) }}">{{ label }}</a>{% endfor %}</nav>
+    {% if matches %}
+        <div class="admin-match-list">
+        {% for match in matches %}
+            <article class="admin-match-card">
+                <header><div><p class="admin-eyebrow">{{ match.status|upper }}</p><h2>{% if match.requester and match.partner %}{{ match.requester.name }} <span>↔</span> {{ match.partner.name }}{% else %}Connection unavailable{% endif %}</h2><p>{{ match.matching_reason }}</p></div>{% if match.compatibility_score is not none %}<div class="admin-match-score"><strong>{{ match.compatibility_score }}%</strong><span>compatible</span></div>{% endif %}</header>
+                {% if match.requester and match.partner %}
+                    <div class="admin-match-skills"><div><small>{{ match.requester.name }} TEACHES</small><strong>{{ match.requester.teach_skill }}</strong><span>Wants: {{ match.requester.learn_skill }}</span></div><div><small>{{ match.partner.name }} TEACHES</small><strong>{{ match.partner.teach_skill }}</strong><span>Wants: {{ match.partner.learn_skill }}</span></div></div>
+                {% endif %}
+                {% if match.status == "cancelled" and match.cancellation_reason %}<p class="verification-rejection">Cancellation reason: {{ match.cancellation_reason }}</p>{% endif %}
+                {% if match.status in ["pending", "accepted"] %}
+                    <details class="admin-cancel-match"><summary>Cancel connection for a safety issue</summary><form method="POST" action="{{ url_for('admin_cancel_connection', connection_id=match._id) }}"><label>Admin note (optional)<textarea name="reason" maxlength="500" placeholder="Record why this connection must be cancelled."></textarea></label><button class="admin-action-button delete-action" type="submit">Cancel connection</button></form></details>
+                {% endif %}
+            </article>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="admin-empty admin-management-empty"><h2>No matches in this view</h2><p>Connection requests will appear here as SkillSwap users discover complementary partners.</p><a href="{{ url_for('admin_matches', status='all') }}">View all match requests</a></div>
+    {% endif %}
+</section>
+{% endblock %}

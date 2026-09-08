@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Choose Access - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="access-choice-page">
+    <div class="access-choice-hero">
+        <div class="access-choice-intro">
+            <p class="admin-eyebrow">WELCOME TO SKILLSWAP</p>
+            <h1>Pick your <span>learning space.</span></h1>
+            <p>Learn, teach, and grow with your community — or manage the platform that makes it possible.</p>
+        </div>
+    </div>
+
+    <div class="access-choice-grid">
+        <article class="access-choice-card learner-choice">
+            <div class="access-icon">U</div>
+            <p>FOR STUDENTS & LEARNERS</p>
+            <h2>User access</h2>
+            <span>Find matches, plan skill exchanges, chat, learn, teach, and build your reputation.</span>
+            <a href="{{ url_for('login') }}">User Login</a>
+            <a class="access-secondary-link" href="{{ url_for('register') }}">Create User Account</a>
+        </article>
+
+        <article class="access-choice-card admin-choice">
+            <div class="access-icon">A</div>
+            <p>FOR PLATFORM MANAGEMENT</p>
+            <h2>Admin access</h2>
+            <span>Manage users, verification, certificates, reports, and overall SkillSwap activity.</span>
+            <a href="{{ url_for('admin_login') }}">Admin Login</a>
+        </article>
+    </div>
+</section>
+{% endblock %}

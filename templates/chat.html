@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Chat with {{ partner.name }} - SkillSwap{% endblock %}
+
+{% block content %}
+
+<section class="chat-page">
+    <div class="chat-shell">
+        <header class="chat-header">
+            <a href="{{ url_for('connections') }}" class="chat-back-link">Back</a>
+            <div class="chat-person">
+                {% if partner.get("profile_photo") %}
+                    <img class="connection-avatar connection-photo" src="{{ url_for('profile_photo', filename=partner.profile_photo) }}" alt="{{ partner.name }}'s profile photo">
+                {% else %}
+                    <div class="connection-avatar">{{ partner.name[0] }}</div>
+                {% endif %}
+                <div>
+                    <h1>{{ partner.name }}</h1>
+                    <p>Teaches {{ partner.teach_skill }} and learns {{ partner.learn_skill }}</p>
+                    {% if partner.get("bio") %}<small>{{ partner.bio }}</small>{% endif %}
+                </div>
+            </div>
+            <span class="status-badge status-accepted">Active Exchange</span>
+        </header>
+
+        {% if notice %}
+            <p class="chat-notice">{{ notice }}</p>
+        {% endif %}
+
+        <details class="safety-report">
+            <summary>Report a safety concern</summary>
+            <form action="{{ url_for('report_connection', connection_id=connection._id) }}" method="POST">
+                <select name="report_type">
+                    <option>Inappropriate behaviour</option>
+                    <option>Spam or scam</option>
+                    <option>Harassment</option>
+                    <option>Other</option>
+                </select>
+                <textarea name="details" maxlength="1000" rows="3" placeholder="Tell us what happened. This report is private." required></textarea>
+                <button type="submit">Submit private report</button>
+            </form>
+        </details>
+
+        <section class="exchange-goals" aria-labelledby="goals-heading">
+            <div class="goals-heading">
+                <div>
+                    <p class="dashboard-label">EXCHANGE OUTCOMES</p>
+                    <h2 id="goals-heading">Learning goals</h2>
+                </div>
+                <span>{{ exchange_goals|length }} of 2 shared</span>
+            </div>
+
+            <div class="goal-list">
+                {% for exchange_goal in exchange_goals %}
+                    <article class="goal-card {% if exchange_goal.is_mine %}my-goal-card{% endif %}">
+                        <p>{{ "YOUR GOAL" if exchange_goal.is_mine else exchange_goal.owner.name|upper }}</p>
+                        <strong>{{ exchange_goal.goal }}</strong>
+                    </article>
+                {% endfor %}
+                {% if not exchange_goals %}
+                    <p class="goal-empty">Set a simple outcome for this exchange, such as “Build a Flask login page”.</p>
+                {% endif %}
+            </div>
+
+            {% if connection.status == "accepted" %}
+                <form action="{{ url_for('save_exchange_goal', connection_id=connection._id) }}" method="POST" class="goal-form">
+                    <label for="goal">Your goal for this exchange</label>
+                    <div>
+                        <input
+                            type="text"
+                            id="goal"
+                            name="goal"
+                            maxlength="300"
+                            value="{{ my_exchange_goal.goal if my_exchange_goal else '' }}"
+                            placeholder="e.g. Build a responsive portfolio page"
+                            required
+                        >
+                        <button type="submit">Save Goal</button>
+                    </div>
+                </form>
+            {% endif %}
+        </section>
+
+        <section class="exchange-timetable" aria-labelledby="timetable-heading">
+            <div class="timetable-heading">
+                <div>
+                    <p class="dashboard-label">SHARED LEARNING PLAN</p>
+                    <h2 id="timetable-heading">Exchange timetable</h2>
+                    <p>Plan sessions for any day of the week. Both partners confirm the full timetable before sessions can be recorded.</p>
+                </div>
+                {% if timetable_confirmed %}
+                    <span class="timetable-status timetable-status-confirmed">Confirmed by both</span>
+                {% elif timetable_ready %}
+                    <span class="timetable-status">Waiting for confirmation</span>
+                {% else %}
+                    <span class="timetable-status">Building timetable</span>
+                {% endif %}
+            </div>
+
+            <div class="timetable-grid">
+                {% for slot in timetable_slots %}
+                    <article class="timetable-slot {% if slot.is_my_teaching %}my-timetable-slot{% endif %}">
+                        <p class="timetable-role">
+                            {% if slot.is_my_teaching %}YOU TEACH{% else %}{{ partner.name|upper }} TEACHES{% endif %}
+                        </p>
+                        <h3>{{ slot.skill }}</h3>
+                        <p><strong>Days:</strong> {{ slot.days|join(", ") }}</p>
+                        <p><strong>Time:</strong> {{ slot.start_time }} · {{ slot.duration_minutes }} minutes</p>
+                        {% if slot.is_scheduled_today %}
+                            <span class="session-today-label">Scheduled today ({{ today }})</span>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+
+                {% if not timetable_slots %}
+                    <div class="timetable-empty">No sessions planned yet. Add the times when you will teach {{ partner.name }}.</div>
+                {% endif %}
+            </div>
+
+            {% if connection.status == "accepted" %}
+                <form action="{{ url_for('save_timetable', connection_id=connection._id) }}" method="POST" class="timetable-form">
+                    <div class="timetable-form-heading">
+                        <div>
+                            <h3>Your teaching timetable</h3>
+                            <p>You will teach <strong>{{ current_user.teach_skill }}</strong> to {{ partner.name }}.</p>
+                        </div>
+                        {% if my_timetable_slot %}<span>Update your plan</span>{% endif %}
+                    </div>
+
+                    <div class="weekday-picker" role="group" aria-label="Choose weekdays">
+                        {% for day in weekdays %}
+                            <label>
+                                <input type="checkbox" name="days" value="{{ day }}" {% if my_timetable_slot and day in my_timetable_slot.days %}checked{% endif %}>
+                                <span>{{ day[:3] }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+
+                    <div class="timetable-form-controls">
+                        <label>
+                            Start time
+                            <input type="time" name="start_time" value="{{ my_timetable_slot.start_time if my_timetable_slot else '' }}" required>
+                        </label>
+                        <label>
+                            Session duration
+                            <select name="duration_minutes" required>
+                                {% for minutes in [30, 60, 90, 120] %}
+                                    <option value="{{ minutes }}" {% if my_timetable_slot and my_timetable_slot.duration_minutes == minutes %}selected{% endif %}>{{ minutes }} minutes</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <button type="submit" class="save-timetable-btn">Save My Sessions</button>
+                    </div>
+                </form>
+
+                {% if timetable_ready and not timetable_confirmed_by_me %}
+                    <form action="{{ url_for('confirm_timetable', connection_id=connection._id) }}" method="POST" class="confirm-timetable-form">
+                        <p>Review both teaching schedules, then confirm the shared timetable.</p>
+                        <button type="submit">Confirm Timetable</button>
+                    </form>
+                {% elif timetable_ready and not timetable_confirmed %}
+                    <p class="timetable-waiting">You confirmed the timetable. Waiting for {{ partner.name }} to confirm.</p>
+                {% endif %}
+            {% endif %}
+
+            {% if timetable_confirmed and connection.status == "accepted" %}
+                <section class="session-confirmation-section">
+                    <h3>Today’s sessions</h3>
+                    {% set todays_slots = timetable_slots|selectattr('is_scheduled_today')|list %}
+                    {% if todays_slots %}
+                        <div class="today-session-list">
+                            {% for slot in todays_slots %}
+                                <div class="today-session-card">
+                                    <div>
+                                        <strong>{{ slot.skill }}</strong>
+                                        <p>{{ slot.teacher.name }} teaches · {{ slot.start_time }} · {{ slot.duration_minutes }} minutes</p>
+                                    </div>
+                                    <form action="{{ url_for('confirm_session', connection_id=connection._id, teacher_id=slot.teacher_id) }}" method="POST">
+                                        <button type="submit">Mark Session Complete</button>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="timetable-waiting">There are no sessions scheduled for today ({{ today }}).</p>
+                    {% endif %}
+                </section>
+            {% endif %}
+
+            {% if session_history %}
+                <section class="session-history-section">
+                    <h3>Recent session confirmations</h3>
+                    <div class="session-history-list">
+                        {% for scheduled_session in session_history %}
+                            <div class="session-history-item {% if scheduled_session.is_confirmed %}session-confirmed{% endif %}">
+                                <div>
+                                    <strong>{{ scheduled_session.skill }}</strong>
+                                    <p>{{ scheduled_session.teacher.name }} taught · {{ scheduled_session.session_date }} · {{ scheduled_session.duration_minutes }} minutes</p>
+                                </div>
+                                {% if scheduled_session.is_confirmed %}
+                                    <span>Confirmed by both</span>
+                                {% elif scheduled_session.confirmed_by_me %}
+                                    <span>Waiting for partner</span>
+                                {% elif connection.status == "accepted" %}
+                                    <form action="{{ url_for('confirm_session', connection_id=connection._id, teacher_id=scheduled_session.teacher_id) }}" method="POST">
+                                        <button type="submit">Confirm Session</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+        </section>
+
+        <div class="chat-messages" id="chat-messages">
+            {% if conversation %}
+                {% for message in conversation %}
+                    <div class="message-row {% if message.is_mine %}message-row-mine{% else %}message-row-theirs{% endif %}">
+                        <div class="message-bubble">
+                            <p>{{ message.message }}</p>
+                            <time>{{ message.sent_at.strftime("%I:%M %p") }}</time>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="chat-empty-state">
+                    <div class="chat-empty-icon">S</div>
+                    <h2>Start your skill exchange</h2>
+                    <p>
+                        Say hello and decide what you would like to learn and teach first.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+
+        <form method="POST" class="chat-form">
+            <label for="message" class="visually-hidden">Message</label>
+            <input
+                type="text"
+                id="message"
+                name="message"
+                placeholder="Type a message..."
+                maxlength="1000"
+                autocomplete="off"
+                required
+            >
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}SkillSwap - Learn & Teach Together{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+
+    <div class="hero-text">
+
+        <div class="welcome-badge">
+            Learn from people. Teach what you know.
+        </div>
+
+        <h1>
+            The right skill is
+            <span>just a swap away</span>
+        </h1>
+
+        <p>
+            SkillSwap connects students and young learners
+            who want to exchange skills, learn together,
+            and grow through real connections.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="{{ url_for('matches') if session.get('user_id') else url_for('access_choice') }}" class="primary-btn">Start SkillSwapping →</a>
+            <a href="#how-it-works" class="secondary-btn">Explore Skills</a>
+        </div>
+
+    </div>
+
+    <article class="hero-card" aria-label="Today's recommended match">
+        <div class="card-header">
+            <div>
+                <small>Today's Match</small>
+                <h3 class="typed-match-score">{{ match_cycles[0].score }}% Compatible</h3>
+            </div>
+            <div class="match-icon" aria-hidden="true">✓</div>
+        </div>
+
+        <div class="user-match">
+            <div class="avatar"><img src="{{ url_for('static', filename='images/default-profile-avatar.svg') }}" alt="Default profile avatar"></div>
+            <div>
+                <strong class="typed-match-skills" aria-live="polite">Python ↔ UI/UX</strong>
+                <p>Complementary skills</p>
+            </div>
+        </div>
+
+        <div class="match-reason">
+            <strong>Why this match?</strong>
+            <p class="typed-match-reason">You want to learn UI/UX and they want to learn Python. Your availability also overlaps.</p>
+        </div>
+
+        <a class="home-match-link" href="{{ url_for('matches') if session.get('user_id') else url_for('access_choice') }}">View Match</a>
+    </article>
+
+</section>
+
+
+<section class="features" id="how-it-works">
+
+    <div class="section-heading">
+        <small>WHY SKILLSWAP?</small>
+        <h2>Learn differently. Learn together.</h2>
+    </div>
+
+    <div class="feature-grid">
+        <article class="feature-card">
+            <h3>Find Your Match</h3>
+            <p>Discover people whose skills, interests and availability complement yours.</p>
+        </article>
+
+        <article class="feature-card">
+            <h3>Teach &amp; Learn</h3>
+            <p>Share what you know while learning something new from your partner.</p>
+        </article>
+
+        <article class="feature-card">
+            <h3>Set Your Duration</h3>
+            <p>Choose how long you want to commit to your learning journey.</p>
+        </article>
+
+        <article class="feature-card">
+            <h3>Build Your Reputation</h3>
+            <p>Rate your learning partner and earn badges as you complete your journey.</p>
+        </article>
+    </div>
+
+</section>
+
+<section class="about-section" id="about">
+    <div>
+        <small>ABOUT SKILLSWAP</small>
+        <h2>Built for learning together.</h2>
+    </div>
+    <p>
+        SkillSwap is a skill-exchange platform built to make learning more social, practical, and accessible. Instead of simply searching for courses, you can connect with people who have skills you want to learn while sharing the skills you already know. Find your perfect skill match, learn at your own pace, teach others, and grow together through meaningful connections. With skill verification, certificates, ratings, and a safe community, SkillSwap turns everyday knowledge into opportunities to learn, connect, and grow.
+        <br><br>
+        <strong>The right skill is just a swap away.</strong>
+    </p>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (() => {
+        const cycles = {{ match_cycles | tojson }};
+        const skills = document.querySelector('.typed-match-skills');
+        const reason = document.querySelector('.typed-match-reason');
+        const score = document.querySelector('.typed-match-score');
+
+        if (!skills || !reason || !score || !cycles.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return;
+        }
+
+        let cycleIndex = 0;
+        let characterIndex = cycles[0].skills.length;
+        let deleting = false;
+
+        const typeMatch = () => {
+            const current = cycles[cycleIndex];
+            skills.textContent = current.skills.slice(0, characterIndex);
+
+            if (!deleting && characterIndex < current.skills.length) {
+                characterIndex += 1;
+                window.setTimeout(typeMatch, 75);
+                return;
+            }
+
+            if (!deleting) {
+                deleting = true;
+                window.setTimeout(typeMatch, 1700);
+                return;
+            }
+
+            if (characterIndex > 0) {
+                characterIndex -= 1;
+                window.setTimeout(typeMatch, 35);
+                return;
+            }
+
+            cycleIndex = (cycleIndex + 1) % cycles.length;
+            reason.textContent = cycles[cycleIndex].reason;
+            score.textContent = `${cycles[cycleIndex].score}% Compatible`;
+            deleting = false;
+            window.setTimeout(typeMatch, 300);
+        };
+
+        window.setTimeout(typeMatch, 1700);
+    })();
+</script>
+{% endblock %}

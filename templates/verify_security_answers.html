@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Account - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="auth-page password-reset-page">
+    <div class="auth-card password-reset-card">
+        <p class="dashboard-label">ACCOUNT SECURITY</p>
+        <div class="logo"><img class="brand-mark" src="{{ url_for('static', filename='images/skillswap-s-mark.png') }}" alt="">SkillSwap</div>
+        <h1>Answer your security questions</h1>
+        <p>Answer both questions correctly to reset your {{ "admin" if role == "admin" else "user" }} password.</p>
+        {% if error %}<div class="error-message">{{ error }}</div>{% endif %}
+        <form method="POST">
+            <div class="form-group">
+                <label for="security_answer_one">{{ questions[0].question }}</label>
+                <input id="security_answer_one" name="security_answer_one" type="text" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+                <label for="security_answer_two">{{ questions[1].question }}</label>
+                <input id="security_answer_two" name="security_answer_two" type="text" autocomplete="off" required>
+            </div>
+            <button class="login-submit" type="submit">Verify answers</button>
+        </form>
+        <a class="auth-back-link" href="{{ url_for('forgot_password', role=role) }}">Back to password recovery</a>
+    </div>
+</section>
+{% endblock %}

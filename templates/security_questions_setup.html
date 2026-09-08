@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Set Recovery Questions - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="auth-page password-reset-page">
+    <div class="auth-card password-reset-card">
+        <p class="dashboard-label">ACCOUNT SECURITY</p>
+        <div class="logo"><img class="brand-mark" src="{{ url_for('static', filename='images/skillswap-s-mark.png') }}" alt="">SkillSwap</div>
+        <h1>Set your recovery questions</h1>
+        <p>Choose two questions you can answer later if you forget your password.</p>
+        {% if error %}<div class="error-message">{{ error }}</div>{% endif %}
+        <form method="POST" class="security-questions-form">
+            <div class="form-group">
+                <label for="security_question_one">First question</label>
+                <select id="security_question_one" name="security_question_one" required>
+                    <option value="">Choose a question</option>
+                    {% for question in security_question_options %}
+                        <option value="{{ question }}">{{ question }}</option>
+                    {% endfor %}
+                </select>
+                <label for="security_answer_one">Your answer</label>
+                <input id="security_answer_one" name="security_answer_one" type="text" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+                <label for="security_question_two">Second question</label>
+                <select id="security_question_two" name="security_question_two" required>
+                    <option value="">Choose a different question</option>
+                    {% for question in security_question_options %}
+                        <option value="{{ question }}">{{ question }}</option>
+                    {% endfor %}
+                </select>
+                <label for="security_answer_two">Your answer</label>
+                <input id="security_answer_two" name="security_answer_two" type="text" autocomplete="off" required>
+            </div>
+            <button class="login-submit" type="submit">Save recovery questions</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

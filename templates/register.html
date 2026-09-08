@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - SkillSwap{% endblock %}
+
+{% block content %}
+
+<section class="register-page">
+    <div class="register-layout">
+    <div class="register-card">
+
+        <div class="register-header">
+            <div class="logo"><img class="brand-mark" src="{{ url_for('static', filename='images/skillswap-s-mark.png') }}" alt="">SkillSwap</div>
+
+            <h1>Create your account</h1>
+
+            <p>
+                Tell us what you can teach and what you want to learn.
+            </p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+
+            {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter your name"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Create a password"
+                    minlength="8"
+                    autocomplete="new-password"
+                    title="Use at least 8 characters."
+                    required
+                >
+                <small class="password-rule">Use at least 8 characters.</small>
+            </div>
+
+            <fieldset class="security-questions">
+                <legend>Account recovery questions</legend>
+                <p>Choose two questions and answers you can remember. They are used only to reset your password.</p>
+                <div class="form-group">
+                    <label for="security_question_one">First question</label>
+                    <select id="security_question_one" name="security_question_one" required>
+                        <option value="">Choose a question</option>
+                        {% for question in security_question_options %}
+                            <option value="{{ question }}">{{ question }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="security_answer_one">Your answer</label>
+                    <input id="security_answer_one" name="security_answer_one" type="text" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="security_question_two">Second question</label>
+                    <select id="security_question_two" name="security_question_two" required>
+                        <option value="">Choose a different question</option>
+                        {% for question in security_question_options %}
+                            <option value="{{ question }}">{{ question }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="security_answer_two">Your answer</label>
+                    <input id="security_answer_two" name="security_answer_two" type="text" autocomplete="off" required>
+                </div>
+            </fieldset>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label for="teach_skill">Skill You Can Teach</label>
+                    <input
+                        type="text"
+                        id="teach_skill"
+                        name="teach_skill"
+                        placeholder="e.g. Python"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="learn_skill">Skill You Want to Learn</label>
+                    <input
+                        type="text"
+                        id="learn_skill"
+                        name="learn_skill"
+                        placeholder="e.g. UI/UX"
+                        required
+                    >
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label for="skill_level">Skill Level</label>
+
+                <select id="skill_level" name="skill_level" required>
+                    <option value="">Select your level</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                </select>
+            </div>
+
+            <div class="form-group certificate-upload-group" data-certificate-upload hidden>
+                <label for="certificate">Certificate for Your Teaching Skill</label>
+                <input
+                    type="file"
+                    id="certificate"
+                    name="certificate"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    data-certificate-input
+                >
+                <small>Required for Intermediate and Advanced. PDF, PNG, JPG or JPEG only; maximum 10 MB.</small>
+                <small>We read certificate text locally to compare your name, teaching skill, and level. Your upload is deleted if your account is deleted.</small>
+                <small>Intermediate and Advanced members can discover matches and take sessions only after their certificate is verified.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="profile_photo">Profile Photo (optional)</label>
+                <input type="file" id="profile_photo" name="profile_photo" accept=".png,.jpg,.jpeg">
+                <small>Use a PNG, JPG, or JPEG photo, up to 5 MB.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="availability">Availability</label>
+
+                <input
+                    type="text"
+                    id="availability"
+                    name="availability"
+                    placeholder="e.g. Weekdays 6 PM - 8 PM"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="learning_duration">Learning Commitment</label>
+
+                <select id="learning_duration" name="learning_duration" required>
+                    <option value="">Select your commitment</option>
+                    <option value="1 Month">1 Month</option>
+                    <option value="3 Months">3 Months</option>
+                    <option value="6 Months">6 Months</option>
+                </select>
+            </div>
+
+            <button type="submit" class="register-btn">
+                Create Account
+            </button>
+
+        </form>
+
+        <p class="login-text">
+            Already have an account?
+            <a href="{{ url_for('login') }}">Login</a>
+        </p>
+
+    </div>
+    </div>
+
+</section>
+
+{% endblock %}

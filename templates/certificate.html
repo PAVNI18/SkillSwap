@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Skill Certificate - SkillSwap{% endblock %}
+
+{% block content %}
+
+<section class="certificate-page">
+    <div class="certificate-actions no-print">
+        <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+        <button type="button" id="print-certificate">Print Certificate</button>
+    </div>
+
+    <article class="certificate-sheet">
+        <div class="certificate-border">
+            <div class="certificate-logo">Skill<span>Swap</span></div>
+            <p class="certificate-kicker">CERTIFICATE OF SKILL VERIFICATION</p>
+            <h1>Certificate of Achievement</h1>
+            <p class="certificate-presented">This certificate is presented to</p>
+            <h2>{{ user.name }}</h2>
+            <p class="certificate-copy">for verified skill knowledge in</p>
+            <h3>{{ verification.skill }}</h3>
+
+            <div class="certificate-meta">
+                <div>
+                    <span>Date verified</span>
+                    <strong>{{ verification.verified_at.strftime("%d %B %Y") }}</strong>
+                </div>
+                <div>
+                    <span>Certificate ID</span>
+                    <strong>{{ verification.certificate_id }}</strong>
+                </div>
+            </div>
+
+            <p class="certificate-note">
+                Issued as SkillSwap project proof of certificate-based skill verification.
+            </p>
+        </div>
+    </article>
+</section>
+
+{% endblock %}

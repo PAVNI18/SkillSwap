@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="simple-page themed-simple-page">
+    <div class="page-heading">
+        <p class="dashboard-label">KEEP UP TO DATE</p>
+        <h1>Notifications</h1>
+        <p>Connection requests, messages, and exchange updates appear here.</p>
+    </div>
+    {% if notifications %}
+        <div class="notification-list">
+            {% for item in notifications %}
+                <article class="notification-item {% if not item.is_read %}notification-unread{% endif %}">
+                    <div><strong>{{ item.message }}</strong><span>{{ item.created_at.strftime("%d %b · %I:%M %p") }}</span></div>
+                    {% if item.link %}<a href="{{ item.link }}">Open</a>{% endif %}
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="friendly-empty-state"><h2>You’re all caught up</h2><p>New connection and learning updates will appear here.</p><a href="{{ url_for('matches') }}">Discover matches</a></div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - SkillSwap{% endblock %}
+
+{% block content %}
+
+<section class="edit-profile-page">
+    <div class="edit-profile-card">
+        <div class="edit-profile-header">
+            <p class="dashboard-label">YOUR SKILLSWAP PROFILE</p>
+            <h1>Edit your details</h1>
+            <p>Keep your skills and availability up to date for better matches.</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% if error %}
+                <div class="error-message">{{ error }}</div>
+            {% endif %}
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value="{{ user.name }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    value="{{ user.email }}"
+                    disabled
+                >
+                <small>Your email is used to sign in and cannot be changed here.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="profile_photo">Profile Photo (optional)</label>
+                <input type="file" id="profile_photo" name="profile_photo" accept=".png,.jpg,.jpeg">
+                {% if user.get("profile_photo") %}
+                    <img class="profile-photo-preview" src="{{ url_for('profile_photo', filename=user.profile_photo) }}" alt="Your current profile photo">
+                {% else %}
+                    <small>Use a PNG or JPG photo, up to 5 MB.</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group bio-field">
+                <label for="bio">Short Bio (optional)</label>
+                <textarea id="bio" name="bio" maxlength="300" rows="3" placeholder="e.g. Computer science student who enjoys building friendly web experiences.">{{ user.get("bio", "") }}</textarea>
+                <div class="bio-field-help">
+                    <small>Tell potential partners a little about your learning interests.</small>
+                    <span data-bio-count>0 / 300</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="teach_skill">Skill You Can Teach</label>
+                    <input
+                        type="text"
+                        id="teach_skill"
+                        name="teach_skill"
+                        value="{{ user.teach_skill }}"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="learn_skill">Skill You Want to Learn</label>
+                    <input
+                        type="text"
+                        id="learn_skill"
+                        name="learn_skill"
+                        value="{{ user.learn_skill }}"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="skill_level">Skill Level</label>
+                <select id="skill_level" name="skill_level" required>
+                    <option value="Beginner" {% if user.skill_level == "Beginner" %}selected{% endif %}>Beginner</option>
+                    <option value="Intermediate" {% if user.skill_level == "Intermediate" %}selected{% endif %}>Intermediate</option>
+                    <option value="Advanced" {% if user.skill_level == "Advanced" %}selected{% endif %}>Advanced</option>
+                </select>
+            </div>
+
+            <div
+                class="form-group certificate-upload-group"
+                data-certificate-upload
+                data-has-certificate="{{ 'true' if user.get('certificate_proof') else 'false' }}"
+                {% if user.skill_level == "Beginner" %}hidden{% endif %}
+            >
+                <label for="certificate">Certificate for Your Teaching Skill</label>
+                <input
+                    type="file"
+                    id="certificate"
+                    name="certificate"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    data-certificate-input
+                >
+                {% if user.get("certificate_proof") %}
+                    <small>
+                        Current proof: {{ user.certificate_proof.original_name }}.
+                        <a href="{{ url_for('certificate_proof', filename=user.certificate_proof.filename) }}" target="_blank">View upload</a>
+                        Upload a new file here to replace it; the old proof is deleted after replacement.
+                    </small>
+                {% else %}
+                    <small>Required for Intermediate and Advanced. PDF, PNG, JPG or JPEG only; maximum 10 MB.</small>
+                {% endif %}
+                <small>We read certificate text locally to compare your name, teaching skill, and level.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="availability">Availability</label>
+                <input
+                    type="text"
+                    id="availability"
+                    name="availability"
+                    value="{{ user.availability }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="learning_duration">Learning Commitment</label>
+                <select id="learning_duration" name="learning_duration" required>
+                    <option value="" {% if not user.get("learning_duration") %}selected{% endif %}>Select your commitment</option>
+                    <option value="1 Month" {% if user.get("learning_duration") == "1 Month" %}selected{% endif %}>1 Month</option>
+                    <option value="3 Months" {% if user.get("learning_duration") == "3 Months" %}selected{% endif %}>3 Months</option>
+                    <option value="6 Months" {% if user.get("learning_duration") == "6 Months" %}selected{% endif %}>6 Months</option>
+                </select>
+            </div>
+
+            <div class="edit-profile-actions">
+                <a href="{{ url_for('dashboard') }}" class="cancel-link">Cancel</a>
+                <button type="submit" class="save-profile-btn">Save Changes</button>
+            </div>
+        </form>
+        {% if user.get("certificate_proof") %}
+            <section class="certificate-removal-panel">
+                <h2>Remove certificate</h2>
+                <p>This permanently deletes your uploaded certificate and removes its skill-verification status. You may upload a new certificate later.</p>
+                <form method="POST" action="{{ url_for('remove_own_certificate') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <label for="certificate-remove-confirmation">Type REMOVE to confirm</label>
+                    <input id="certificate-remove-confirmation" type="text" name="confirmation" autocomplete="off" required>
+                    <button class="admin-action-button delete-action" type="submit">Remove certificate</button>
+                </form>
+            </section>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}

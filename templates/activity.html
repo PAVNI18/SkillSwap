@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Activity History - SkillSwap{% endblock %}
+
+{% block content %}
+<section class="simple-page themed-simple-page">
+    <div class="page-heading">
+        <p class="dashboard-label">YOUR LEARNING JOURNEY</p>
+        <h1>Activity history</h1>
+        <p>A record of your important SkillSwap milestones.</p>
+    </div>
+    {% if activity_items %}
+        <div class="activity-history-list">
+            {% for item in activity_items %}
+                <article><div><strong>{{ item.title }}</strong><p>{{ item.detail }}</p><span>{{ item.created_at.strftime("%d %b %Y · %I:%M %p") }}</span></div>{% if item.link %}<a href="{{ item.link }}">View</a>{% endif %}</article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="friendly-empty-state"><h2>Your journey starts here</h2><p>Connect with a learner and set your first timetable to begin building activity.</p><a href="{{ url_for('matches') }}">Discover matches</a></div>
+    {% endif %}
+</section>
+{% endblock %}
