@@ -39,6 +39,16 @@ SkillSwap is a college project that helps learners exchange complementary skills
 
 6. Open `http://127.0.0.1:5000` in your browser.
 
+## College-demo profiles
+
+To create ten safe UI/UX ↔ Web Development learner cards for the Discover Matches screen, run:
+
+```bash
+python3 seed_demo_profiles.py
+```
+
+They use `@skillswap.local` addresses and are clearly marked as demo profiles.
+
 ## Notes
 
 - Uploaded certificates and profile photos are intentionally excluded from Git.
