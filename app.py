@@ -1433,16 +1433,28 @@ def find_complementary_matches(current_user):
             == normalise_skill(candidate.get("learn_skill", ""))
         )
 
-        if user_can_learn_from_candidate and candidate_can_learn_from_user:
+        is_complementary_match = (
+            user_can_learn_from_candidate and candidate_can_learn_from_user
+        )
+        is_demo_skill_suggestion = candidate.get("is_demo") and not is_complementary_match
+
+        if is_complementary_match or is_demo_skill_suggestion:
             score, availability_message, level_message = calculate_compatibility(
                 current_user,
                 candidate
             )
+            if is_demo_skill_suggestion:
+                # Demo profiles give college-project users a varied deck while
+                # keeping genuine reciprocal matches ahead of suggestions.
+                score = max(55, score - 12)
+                availability_message = "Demo skill to explore"
+                level_message = "Explore a different skill"
 
             match = dict(candidate)
             match["compatibility_score"] = score
             match["availability_message"] = availability_message
             match["level_message"] = level_message
+            match["is_demo_recommendation"] = is_demo_skill_suggestion
             matches.append(match)
 
     return sorted(matches, key=lambda match: match["compatibility_score"], reverse=True)

@@ -55,13 +55,18 @@ z{% extends "base.html" %}
                             <div class="match-avatar">{{ match.name[0] }}</div>
                         {% endif %}
                         <div>
-                            <p class="match-card-eyebrow">SKILLSWAP MATCH</p>
+                            <p class="match-card-eyebrow">{% if match.is_demo_recommendation %}DEMO SKILL TO EXPLORE{% else %}SKILLSWAP MATCH{% endif %}</p>
                             <h2>{{ match.name }}</h2>
                             {% if match.get("bio") %}<p class="match-bio">{{ match.bio }}</p>{% endif %}
                         </div>
                         <div class="compatibility-score">
-                            <strong>{{ match.compatibility_score }}%</strong>
-                            <span>match</span>
+                            {% if match.is_demo_recommendation %}
+                                <strong>Explore</strong>
+                                <span>demo skill</span>
+                            {% else %}
+                                <strong>{{ match.compatibility_score }}%</strong>
+                                <span>match</span>
+                            {% endif %}
                         </div>
                     </div>
 

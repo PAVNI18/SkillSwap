@@ -22,16 +22,34 @@ DEMO_PROFILES = (
     ("demo-card-10@skillswap.local", "Aditya Roy", "Portfolio design", "8-9", "Beginner", "Let’s turn good projects into strong, easy-to-use online portfolios."),
 )
 
+VARIED_DEMO_PROFILES = (
+    ("demo-variety-01@skillswap.local", "Zoya Merchant", "Python projects", "8-9", "Beginner", "I can introduce you to Python while I explore UI/UX design.", "Python Programming", "UI/UX"),
+    ("demo-variety-02@skillswap.local", "Manav Gupta", "Brand identities", "Weekdays 6 PM - 8 PM", "Intermediate", "I create visual brands and want to learn digital marketing.", "Graphic Design", "Digital Marketing"),
+    ("demo-variety-03@skillswap.local", "Kavya Iyer", "Dashboards and spreadsheets", "8-9", "Advanced", "I enjoy making data easier to understand and want to learn Python.", "Data Analysis", "Python Programming"),
+    ("demo-variety-04@skillswap.local", "Yash Bansal", "Confident presentations", "Weekdays 6 PM - 8 PM", "Beginner", "I practise public speaking and would love to improve my writing.", "Public Speaking", "Content Writing"),
+    ("demo-variety-05@skillswap.local", "Nisha Thomas", "Short-form stories", "8-9", "Intermediate", "I edit engaging videos and want to learn photography basics.", "Video Editing", "Photography"),
+    ("demo-variety-06@skillswap.local", "Harsh Vora", "Online safety", "Weekdays 6 PM - 8 PM", "Advanced", "I share cybersecurity basics and want to learn web development.", "Cybersecurity Basics", "Web Development"),
+    ("demo-variety-07@skillswap.local", "Simran Kaur", "Everyday Spanish", "8-9", "Beginner", "I can help with beginner Spanish while learning guitar chords.", "Spanish", "Guitar"),
+    ("demo-variety-08@skillswap.local", "Ritesh Jain", "Budgeting and saving", "Weekdays 6 PM - 8 PM", "Intermediate", "I teach practical personal finance and want to explore Excel.", "Personal Finance", "Excel"),
+    ("demo-variety-09@skillswap.local", "Mitali Das", "Useful automations", "8-9", "Advanced", "I build simple AI automations and want to improve prompt writing.", "AI Automation", "Prompt Engineering"),
+    ("demo-variety-10@skillswap.local", "Aman Chawla", "Digital sketches", "Weekdays 6 PM - 8 PM", "Beginner", "I enjoy illustration and want to learn Adobe Photoshop tools.", "Illustration", "Adobe Photoshop"),
+)
+
 
 def main():
-    for email, name, focus, availability, skill_level, bio in DEMO_PROFILES:
+    matching_profiles = [
+        (*profile, "UI/UX", "web development") for profile in DEMO_PROFILES
+    ]
+    for email, name, focus, availability, skill_level, bio, teach_skill, learn_skill in (
+        matching_profiles + list(VARIED_DEMO_PROFILES)
+    ):
         profile = {
             "name": name,
             "email": email,
             "role": "user",
             "is_demo": True,
-            "teach_skill": "UI/UX",
-            "learn_skill": "web development",
+            "teach_skill": teach_skill,
+            "learn_skill": learn_skill,
             "skill_level": skill_level,
             "availability": availability,
             "learning_duration": "3 Months",
@@ -44,7 +62,7 @@ def main():
         }
         if skill_level in {"Intermediate", "Advanced"}:
             update["$set"]["verification"] = {
-                "skill": "UI/UX",
+                "skill": teach_skill,
                 "skill_level": skill_level,
                 "passed": True,
                 "verified_at": datetime.now(timezone.utc),
@@ -57,7 +75,7 @@ def main():
             update,
             upsert=True,
         )
-    print("10 SkillSwap demo learner profiles are ready.")
+    print("20 SkillSwap demo learner profiles are ready.")
 
 
 if __name__ == "__main__":

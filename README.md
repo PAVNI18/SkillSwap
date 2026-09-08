@@ -41,13 +41,13 @@ SkillSwap is a college project that helps learners exchange complementary skills
 
 ## College-demo profiles
 
-To create ten safe UI/UX ↔ Web Development learner cards for the Discover Matches screen, run:
+To create twenty safe demo learner cards for the Discover Matches screen, run:
 
 ```bash
 python3 seed_demo_profiles.py
 ```
 
-They use `@skillswap.local` addresses and are clearly marked as demo profiles.
+They include reciprocal UI/UX ↔ Web Development matches plus varied skill-exploration cards. All use `@skillswap.local` addresses and are clearly marked as demo profiles.
 
 ## Notes
 
