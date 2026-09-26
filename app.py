@@ -225,7 +225,11 @@ def has_complete_security_questions(account):
         for question in questions
     )
 
-CERTIFICATE_UPLOAD_FOLDER = Path(app.root_path) / "uploads" / "certificates"
+if os.getenv("VERCEL"):
+    CERTIFICATE_UPLOAD_FOLDER = Path("/tmp/uploads/certificates")
+else:
+    CERTIFICATE_UPLOAD_FOLDER = Path(app.root_path) / "uploads" / "certificates"
+
 CERTIFICATE_UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 PROFILE_PHOTO_UPLOAD_FOLDER = Path(app.root_path) / "uploads" / "profile_photos"
 PROFILE_PHOTO_UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
