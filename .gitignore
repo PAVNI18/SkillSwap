@@ -9,3 +9,9 @@ uploads/certificates/*
 !uploads/certificates/.gitkeep
 uploads/profile_photos/*
 !uploads/profile_photos/.gitkeep
+
+# Locally generated project artefacts
+output/
+tmp/
+tmp_create_project_report.py
+local-backup/

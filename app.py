@@ -1,3 +1,9 @@
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from flask import (
     Flask,
     render_template,
@@ -10,6 +16,7 @@ from flask import (
     abort
 )
 from models.database import (
+    client as mongo_client,
     users_collection,
     matches_collection,
     messages_collection,
@@ -30,7 +37,6 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 import hashlib
 import json
-import os
 import re
 import random
 import secrets
@@ -52,6 +58,8 @@ app = Flask(__name__)
 # development working, but intentionally signs everyone out after a restart.
 configured_secret = os.environ.get("FLASK_SECRET_KEY")
 if not configured_secret:
+    if os.environ.get("SKILLSWAP_ENV") == "production":
+        raise RuntimeError("FLASK_SECRET_KEY must be set when SKILLSWAP_ENV=production.")
     configured_secret = secrets.token_urlsafe(48)
     print("WARNING: FLASK_SECRET_KEY is not set; sessions will reset when the app restarts.")
 app.secret_key = configured_secret
@@ -160,6 +168,18 @@ def protect_post_requests():
     expected_token = session.get("_csrf_token")
     if not expected_token or not submitted_token or not secrets.compare_digest(expected_token, submitted_token):
         abort(400, description="Your form session expired. Refresh the page and try again.")
+
+
+@app.after_request
+def add_security_headers(response):
+    """Apply browser protections without changing the existing interface."""
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Permissions-Policy", "camera=(), geolocation=(), microphone=()")
+    if os.environ.get("FLASK_COOKIE_SECURE") == "1":
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    return response
 
 
 def has_valid_password(password):
@@ -1460,6 +1480,51 @@ def find_complementary_matches(current_user):
     return sorted(matches, key=lambda match: match["compatibility_score"], reverse=True)
 
 
+def find_searchable_learners(current_user, search_query):
+    """Find eligible SkillSwap learners by name, skill, or profile text.
+
+    Automatic recommendations remain complementary-skill based. A deliberate
+    search is broader, so users can discover another registered learner and
+    choose whether to send a connection request.
+    """
+    normalized_query = search_query.casefold()
+    results = []
+
+    for candidate in users_collection.find({
+        "_id": {"$ne": current_user["_id"]},
+        "role": {"$ne": "admin"},
+    }):
+        if (
+            not candidate.get("teach_skill")
+            or not candidate.get("learn_skill")
+            or not is_user_ready_to_exchange(candidate)
+            or suspension_is_active(candidate)
+        ):
+            continue
+
+        searchable_text = " ".join(
+            str(candidate.get(field, ""))
+            for field in ("name", "teach_skill", "learn_skill", "bio")
+        ).casefold()
+        if normalized_query not in searchable_text:
+            continue
+
+        score, availability_message, level_message = calculate_compatibility(
+            current_user, candidate
+        )
+        result = dict(candidate)
+        result.update({
+            "compatibility_score": score,
+            "availability_message": availability_message,
+            "level_message": level_message,
+            "is_demo_recommendation": False,
+            "is_search_result": True,
+        })
+        results.append(result)
+
+    return sorted(results, key=lambda result: result["compatibility_score"], reverse=True)
+
+
 @app.route("/terms")
 def terms():
     """Show user terms only as the step immediately before registration."""
@@ -1510,6 +1575,16 @@ def accept_admin_terms():
 @app.route("/")
 def splash():
     return redirect(url_for("home"))
+
+
+@app.route("/health")
+def health_check():
+    """Minimal deployment health check; it also verifies database reachability."""
+    try:
+        mongo_client.admin.command("ping")
+    except Exception:
+        return jsonify({"status": "unavailable", "database": "unavailable"}), 503
+    return jsonify({"status": "ok", "database": "ok"})
 
 
 @app.route("/home")
@@ -3181,9 +3256,15 @@ def matches():
     if not is_user_ready_to_exchange(current_user):
         return redirect(url_for("verify_skill"))
 
-    complementary_matches = find_complementary_matches(current_user)
     selected_level = request.args.get("level", "")
     selected_availability = request.args.get("availability", "")
+    search_query = request.args.get("q", "").strip()
+
+    complementary_matches = (
+        find_searchable_learners(current_user, search_query)
+        if search_query
+        else find_complementary_matches(current_user)
+    )
 
     if selected_level in ["Beginner", "Intermediate", "Advanced"]:
         complementary_matches = [
@@ -3196,6 +3277,7 @@ def matches():
             match for match in complementary_matches
             if match.get("availability_message") == "Availability aligns"
         ]
+
     has_passed_match = matches_collection.find_one({
         "from_user_id": current_user["_id"],
         "action": "pass",
@@ -3208,7 +3290,8 @@ def matches():
         has_passed_match=has_passed_match,
         current_user=current_user,
         selected_level=selected_level,
-        selected_availability=selected_availability
+        selected_availability=selected_availability,
+        search_query=search_query
     )
 
 
@@ -3233,13 +3316,18 @@ def match_action(match_id):
         }), 403
 
     candidate_id = ObjectId(match_id)
-    complementary_matches = find_complementary_matches(current_user)
-    candidate = next(
-        (match for match in complementary_matches if match["_id"] == candidate_id),
-        None
-    )
-
-    if not candidate:
+    candidate = users_collection.find_one({
+        "_id": candidate_id,
+        "role": {"$ne": "admin"},
+    })
+    if (
+        not candidate
+        or candidate["_id"] == current_user["_id"]
+        or not candidate.get("teach_skill")
+        or not candidate.get("learn_skill")
+        or not is_user_ready_to_exchange(candidate)
+        or suspension_is_active(candidate)
+    ):
         return jsonify({"error": "This match is no longer available."}), 404
 
     match_record = {
@@ -4260,4 +4348,8 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=os.environ.get("FLASK_DEBUG") == "1")
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", "5000")),
+        debug=os.environ.get("FLASK_DEBUG") == "1",
+    )

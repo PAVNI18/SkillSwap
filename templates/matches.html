@@ -1,4 +1,4 @@
-z{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Discover Matches - SkillSwap{% endblock %}
 
@@ -15,6 +15,16 @@ z{% extends "base.html" %}
     </div>
 
     <form class="match-filter-bar" method="GET">
+        <label class="match-search-field">
+            Search SkillSwap members or skills
+            <input
+                type="search"
+                name="q"
+                value="{{ search_query }}"
+                placeholder="Try Python, UI/UX, or a name"
+                maxlength="80"
+            >
+        </label>
         <label>
             Skill level
             <select name="level">
@@ -32,7 +42,7 @@ z{% extends "base.html" %}
             </select>
         </label>
         <button type="submit">Apply filters</button>
-        {% if selected_level or selected_availability %}
+        {% if search_query or selected_level or selected_availability %}
             <a href="{{ url_for('matches') }}">Clear</a>
         {% endif %}
     </form>
