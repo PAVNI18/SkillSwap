@@ -231,8 +231,13 @@ else:
     CERTIFICATE_UPLOAD_FOLDER = Path(app.root_path) / "uploads" / "certificates"
 
 CERTIFICATE_UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
-PROFILE_PHOTO_UPLOAD_FOLDER = Path(app.root_path) / "uploads" / "profile_photos"
+if os.getenv("VERCEL"):
+    PROFILE_PHOTO_UPLOAD_FOLDER = Path("/tmp/uploads/profile_photos")
+else:
+    PROFILE_PHOTO_UPLOAD_FOLDER = Path(app.root_path) / "uploads" / "profile_photos"
+
 PROFILE_PHOTO_UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+
 ALLOWED_CERTIFICATE_EXTENSIONS = {"pdf", "png", "jpg", "jpeg"}
 ALLOWED_PROFILE_PHOTO_EXTENSIONS = {"png", "jpg", "jpeg"}
 WEEKDAYS = [
